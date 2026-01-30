@@ -20,17 +20,22 @@
 
 ## Technical Context
 
-**Language**: Java 17（backend）、TypeScript/JavaScript（frontend）
+**Language**: Java 17（backend）、TypeScript（frontend）
 
 **Language/Version**:
 - Backend：Java 17 + Spring Boot 3.x
-- Frontend：Node.js 20 + Vue 3 + Vite
+- Frontend：Node.js 20 + Vue 3 + Vite + TypeScript（前端一律使用 TS）
 
 **Primary Dependencies**:
 - Backend：spring-boot-starter-web、spring-boot-starter-validation、spring-boot-starter-jdbc、springdoc-openapi（Swagger UI）
 - Frontend：Vue 3 + Vite、TanStack Query（server state；採 @tanstack/vue-query）、Axios、Vue Router（若需要頁面路由）
 
 UI 框架：Element Plus。
+
+**Frontend TypeScript Conventions**:
+- 前端檔案一律使用 TypeScript（`.ts`、`.vue` 內 `<script lang="ts">`）。
+- 設定路徑別名：`@` → `frontend/src/`。
+- 匯入規則：優先使用 `@/` 絕對路徑；避免跨層相對路徑（例如 `../../`）。
 
 **Storage**: PostgreSQL 16（Stored Procedures）
 

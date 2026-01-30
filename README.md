@@ -4,7 +4,7 @@ A simple social media platform with phone number authentication, posts, and comm
 
 ## 🏗️ Architecture
 
-- **Frontend**: Vue 3 + Vite + TanStack Query
+- **Frontend**: Vue 3 + Vite + TypeScript + TanStack Query
 - **Backend**: Spring Boot 3 (Java 17) + JdbcTemplate + Stored Procedures
 - **Database**: PostgreSQL 16
 - **Web Server**: Nginx (reverse proxy + static files)
@@ -71,6 +71,12 @@ npm run dev      # Dev server on http://localhost:5173
 npm run build    # Build for production
 npm run gen:sdk  # Generate API SDK from backend OpenAPI spec
 ```
+
+##### TypeScript Conventions
+
+- Frontend uses TypeScript only (`.ts` and `<script lang="ts">` in `.vue`).
+- Path alias: `@` maps to `frontend/src/`.
+- Prefer absolute imports with `@/` and avoid deep relative imports (e.g., `../../`).
 
 ##### SDK Generation Workflow
 

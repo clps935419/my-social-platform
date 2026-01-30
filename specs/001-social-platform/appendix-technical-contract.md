@@ -10,7 +10,7 @@
 - 三層式架構：Nginx Web Server + Spring Boot Application Server + PostgreSQL Database。
 - Web Server 指定 Nginx：提供前端靜態檔案並反向代理後端 API。
 - 部署方式指定 Docker Compose：可一鍵啟動 nginx/app/db；Nginx 需反代 `/api/*` 至後端。
-- 前端：Vue 3 + Vite。
+- 前端：Vue 3 + Vite + TypeScript（前端一律使用 TS）。
 - 後端：Spring Boot、RESTful API。
 - 建置：Maven。
 - 資料存取：SP-first，所有 DB 操作必須透過 Stored Procedure。
@@ -32,7 +32,11 @@
 - 狀態管理（是否需要）：
   - MVP 通常不必強制導入全域狀態管理；多數狀態可由 TanStack Query + local component state 解決。
   - 若需要集中管理「登入者資訊、token 狀態、全域 UI（例如 toast）」：推薦 Pinia（Vue 3 主流）。
-- Lint / Format：Vue 本身不內建 lint；MVP 優先採用 Biome（針對 JS/TS/JSON 等做 format + lint）。
+- TypeScript（強制）：
+  - 前端檔案一律使用 TypeScript（`.ts`、`.vue` 內 `<script lang="ts">`）。
+  - 設定路徑別名：`@` → `frontend/src/`。
+  - 匯入規則：優先使用 `@/` 絕對路徑；避免跨層相對路徑（例如 `../../`）。
+- Lint / Format：Vue 本身不內建 lint；MVP 優先採用 Biome（針對 TS/JSON 等做 format + lint）。
   - 若要補齊 `.vue` template 的規則檢查，可加上 ESLint + eslint-plugin-vue（選配）。
 - 測試（最小 POC）：以「可重跑的驗收腳本」或「少量 smoke 測試」為主；完整策略請依專案憲法的品質門檻。
 
