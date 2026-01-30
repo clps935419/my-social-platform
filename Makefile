@@ -38,6 +38,10 @@ build-frontend: install-frontend ## Build frontend for production
 dev: ## Start services and rebuild
 	docker compose up -d --build
 
+volumes-reset: ## Recreate volumes and start services
+	docker compose down -v
+	docker compose up -d
+
 rebuild: clean build up ## Clean rebuild and start
 
 health: ## Check health of all services
