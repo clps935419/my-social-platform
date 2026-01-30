@@ -79,15 +79,15 @@ description: "Task list for feature implementation"
 
 ### Implementation（DB SP → Backend API → Frontend 顯示 → 驗收腳本）
 
-- [ ] T021 [US1] 新增貼文列表 SP（新到舊、排除 deleted；支援 limit/offset 且回 total）於 `DB/200_sp_post.sql`
-- [ ] T022 [US1] 新增留言列表 SP（若貼文 deleted 則 404；支援 limit/offset 且回 total；排序固定一致）於 `DB/210_sp_comment.sql`
-- [ ] T023 [P] [US1] 建立貼文 DAO（呼叫 sp_post_list）於 `backend/src/main/java/com/example/platform/dao/PostDao.java`
-- [ ] T024 [P] [US1] 建立留言 DAO（呼叫 sp_comment_list_by_post）於 `backend/src/main/java/com/example/platform/dao/CommentDao.java`
-- [ ] T025 [US1] 實作 GET /posts（含 limit/offset 驗證；回 PostListResponse）於 `backend/src/main/java/com/example/platform/api/PostController.java`
-- [ ] T026 [US1] 實作 GET /posts/{postId}/comments（deleted post → 404）於 `backend/src/main/java/com/example/platform/api/CommentController.java`
+- [x] T021 [US1] 新增貼文列表 SP（新到舊、排除 deleted；支援 limit/offset 且回 total）於 `DB/200_sp_post.sql`
+- [x] T022 [US1] 新增留言列表 SP（若貼文 deleted 則 404；支援 limit/offset 且回 total；排序固定一致）於 `DB/210_sp_comment.sql`
+- [x] T023 [P] [US1] 建立貼文 DAO（呼叫 sp_post_list）於 `backend/src/main/java/com/example/platform/dao/PostDao.java`
+- [x] T024 [P] [US1] 建立留言 DAO（呼叫 sp_comment_list_by_post）於 `backend/src/main/java/com/example/platform/dao/CommentDao.java`
+- [x] T025 [US1] 實作 GET /posts（含 limit/offset 驗證；回 PostListResponse）於 `backend/src/main/java/com/example/platform/api/PostController.java`
+- [x] T026 [US1] 實作 GET /posts/{postId}/comments（deleted post → 404）於 `backend/src/main/java/com/example/platform/api/CommentController.java`
 - [ ] T027 [P] [US1] 建立前端貼文列表頁（呼叫 GET /api/posts；顯示作者/內容/時間）於 `frontend/src/pages/PostsPage.vue`
 - [ ] T028 [P] [US1] 建立前端貼文詳情頁（顯示留言列表；支持分頁）於 `frontend/src/pages/PostDetailPage.vue`
-- [ ] T029 [US1] 建立 US1 可重跑驗收腳本（.http 或 curl；含 limit/offset 範例與 400 範例）於 `docs/us1-acceptance.http`
+- [x] T029 [US1] 建立 US1 可重跑驗收腳本（.http 或 curl；含 limit/offset 範例與 400 範例）於 `docs/us1-acceptance.http`
 
 **Checkpoint**：US1 腳本可重跑且通過；貼文列表不含已軟刪除貼文。
 

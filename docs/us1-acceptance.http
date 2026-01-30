@@ -1,0 +1,118 @@
+# User Story 1: Browse Posts and Comments - Acceptance Tests
+# Test as a visitor (no authentication required)
+
+### Test 1: List all posts (newest first)
+GET http://localhost/api/posts
+Accept: application/json
+
+### Expected: 200 OK, returns posts sorted by created_at DESC
+### Should return: { items: [...], total: N }
+
+---
+
+### Test 2: List posts with pagination (limit)
+GET http://localhost/api/posts?limit=2
+Accept: application/json
+
+### Expected: 200 OK, returns max 2 posts
+
+---
+
+### Test 3: List posts with pagination (offset)
+GET http://localhost/api/posts?limit=2&offset=1
+Accept: application/json
+
+### Expected: 200 OK, skips first post
+
+---
+
+### Test 4: Invalid limit (too high)
+GET http://localhost/api/posts?limit=200
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
+### Should return: { errorCode: "BAD_REQUEST", message: "Limit must be between 1 and 100" }
+
+---
+
+### Test 5: Invalid limit (negative)
+GET http://localhost/api/posts?limit=-1
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
+
+---
+
+### Test 6: Invalid offset (negative)
+GET http://localhost/api/posts?offset=-1
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
+### Should return: { errorCode: "BAD_REQUEST", message: "Offset must be >= 0" }
+
+---
+
+### Test 7: List comments for a post
+GET http://localhost/api/posts/00000000-0000-0000-0000-000000000101/comments
+Accept: application/json
+
+### Expected: 200 OK, returns comments for the post
+### Should return: { items: [...], total: N }
+
+---
+
+### Test 8: List comments with pagination
+GET http://localhost/api/posts/00000000-0000-0000-0000-000000000101/comments?limit=2
+Accept: application/json
+
+### Expected: 200 OK, returns max 2 comments
+
+---
+
+### Test 9: Comments for non-existent post
+GET http://localhost/api/posts/00000000-0000-0000-0000-999999999999/comments
+Accept: application/json
+
+### Expected: 404 NOT_FOUND
+### Should return: { errorCode: "NOT_FOUND", message: "Post not found" }
+
+---
+
+### Test 10: Comments with invalid post ID format
+GET http://localhost/api/posts/invalid-uuid/comments
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
+### Should return: { errorCode: "BAD_REQUEST", message: "Invalid post ID format" }
+
+---
+
+### Test 11: Verify soft-deleted posts are excluded
+# First, soft delete a post in database:
+# UPDATE posts SET deleted_at = NOW() WHERE post_id = '<some-post-id>';
+# Then verify it's not in the list:
+
+GET http://localhost/api/posts
+Accept: application/json
+
+### Expected: 200 OK, deleted post should NOT appear in results
+
+---
+
+### Test 12: Verify comments on soft-deleted post return 404
+# Using the same soft-deleted post:
+
+GET http://localhost/api/posts/<soft-deleted-post-id>/comments
+Accept: application/json
+
+### Expected: 404 NOT_FOUND
+### Should return: { errorCode: "NOT_FOUND", message: "Post not found" }
+
+---
+
+## Notes
+- All endpoints are PUBLIC (no authentication required)
+- Posts are sorted newest first (created_at DESC)
+- Comments are sorted oldest first (created_at ASC)
+- Default pagination: limit=20, offset=0
+- Maximum limit: 100
