@@ -42,10 +42,8 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.example.platform: DEBUG
+    com.example.platform: INFO
     org.springframework.jdbc: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
