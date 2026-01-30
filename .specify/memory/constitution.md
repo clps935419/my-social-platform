@@ -1,9 +1,9 @@
 <!--
 Sync Impact Report
 
-- Version change: 1.0.0 -> 1.0.1
-- Modified principles: Wording/localization only (English -> zh-TW), no semantic rule changes
-- Added sections: None
+- Version change: 1.0.1 -> 1.1.0
+- Modified principles: Added minimal testing + frontend tooling baselines
+- Added sections: VI. 前端工具鏈底線（Lint/Format）、最小測試（POC）門檻
 - Removed sections: None
 - Templates requiring updates:
 	- .specify/templates/plan-template.md: updated (Constitution Check gates)
@@ -61,6 +61,11 @@ Sync Impact Report
 - 授權檢查必須由後端強制執行（不可只靠前端隱藏按鈕）。
 - 多表異動必須具備交易一致性；任一步驟失敗必須回滾。
 
+### VI. 前端工具鏈底線（Lint/Format Baselines）
+
+- Vue 本身不內建 lint；為了在面試題時限內保持一致性，前端建議採用 Biome 作為 format + lint 的主要工具。
+- 若需要針對 `.vue` template 規則做更完整檢查，允許加上 ESLint + eslint-plugin-vue（選配，不強制）。
+
 ## Additional Constraints
 
 ### Product Invariants
@@ -79,6 +84,13 @@ Sync Impact Report
 - 文件必須包含本機啟動方式與 Docker Compose 啟動方式。
 - OpenAPI/Swagger 文件必須與實作同步，禁止長期偏離。
 
+### 最小測試（POC）門檻
+
+- 本題不以高覆蓋率為目標；優先交付可驗收的端到端流程。
+- 至少提供一種「可重跑」的驗收方式（擇一即可）：
+	- API 驗收腳本（例如 curl 指令集或 .http 檔），涵蓋：register、login、refresh、posts list/create/update/delete、comments list/create。
+	- 或少量自動化 smoke 測試（聚焦上述關鍵路徑）。
+
 ## Governance
 
 - 本憲法優先於所有其他文件（spec/plan/tasks/implementation）。
@@ -94,4 +106,4 @@ Sync Impact Report
 	- 每份 plan 必須包含 Constitution Check。
 	- 若需違反憲法，必須先明確寫出理由並取得同意後才能實作。
 
-**Version**: 1.0.1 | **Ratified**: TODO(RATIFICATION_DATE): Set original adoption date. | **Last Amended**: 2026-01-30
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): Set original adoption date. | **Last Amended**: 2026-01-30
