@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Platform Prototype</title>
+    <!-- Element Plus CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Element Plus JS -->
+    <script src="https://unpkg.com/element-plus"></script>
+    <!-- Element Plus Icons -->
+    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #f2f3f5;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+        }
+
+        /* 版面配置 */
+        .app-layout {
+            max-width: 700px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 導航列 */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            border-bottom: 1px solid #ebeef5;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: #409EFF;
+            cursor: pointer;
+        }
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 主內容區 */
+        .main-content {
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* 發文區塊 */
+        .create-post-card {
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+
+        /* 貼文列表 */
+        .post-card {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .post-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .post-meta {
+            margin-left: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .author-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #303133;
+        }
+        .post-time {
+            font-size: 12px;
+            color: #909399;
+            margin-top: 2px;
+        }
+        .post-body {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #303133;
+            white-space: pre-wrap;
+            margin-bottom: 16px;
+        }
+
+        /* 評論區 */
+        .comments-section {
+            background-color: #f9fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        .comment-item {
+            margin-bottom: 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #ebeef5;
+            padding-bottom: 8px;
+        }
+        .comment-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .comment-user {
+            font-weight: bold;
+            color: #606266;
+            margin-right: 4px;
+        }
+        .guest-notice {
+            text-align: center;
+            color: #909399;
+            font-size: 13px;
+            padding: 8px 0;
+            background: #f4f4f5;
+            border-radius: 4px;
+        }
+
+        /* Helper Classes */
+        .flex-row { display: flex; align-items: center; }
+        .justify-end { justify-content: flex-end; }
+        .mt-2 { margin-top: 8px; }
+        .mr-2 { margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="app-layout">
+            
+            <!-- 1. Header 導航列 -->
+            <header class="header">
+                <div class="brand" @click="resetView">SocialApp</div>
+                
+                <div class="user-area">
+                    <!-- 未登入狀態 -->
+                    <template v-if="!isLoggedIn">
+                        <el-button type="primary" plain @click="openLoginModal">
+                            <el-icon class="mr-2"><User /></el-icon> 登入
+                        </el-button>
+                    </template>
+
+                    <!-- 已登入狀態 -->
+                    <template v-else>
+                        <el-dropdown trigger="click">
+                            <span class="el-dropdown-link flex-row" style="cursor: pointer;">
+                                <el-avatar :size="32" style="background: #409EFF; margin-right: 8px;">
+                                    {{ currentUser.name.charAt(0) }}
+                                </el-avatar>
+                                <span style="font-weight: 500;">{{ currentUser.name }}</span>
+                                <el-icon class="el-icon--right"><Arrow-Down /></el-icon>
+                            </span>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item @click="logout">登出</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </template>
+                </div>
+            </header>
+
+            <!-- 2. 主內容區域 -->
+            <main class="main-content">
+                
+                <!-- A. 發文區塊 (僅登入顯示) -->
+                <transition name="el-fade-in">
+                    <el-card v-if="isLoggedIn" class="create-post-card" shadow="hover">
+                        <template #header>
+                            <div class="flex-row">
+                                <el-icon class="mr-2"><Edit-Pen /></el-icon>
+                                <span>建立新貼文</span>
+                            </div>
+                        </template>
+                        <el-input
+                            v-model="newPostContent"
+                            type="textarea"
+                            :rows="3"
+                            placeholder="今天有什麼想分享的嗎？"
+                            maxlength="500"
+                            show-word-limit
+                        ></el-input>
+                        <div class="flex-row justify-end mt-2">
+                            <el-button type="primary" @click="submitPost" :disabled="!newPostContent.trim()">發佈</el-button>
+                        </div>
+                    </el-card>
+                </transition>
+
+                <!-- B. 貼文列表 (所有人可見) -->
+                <div v-if="posts.length === 0" style="text-align: center; padding: 40px; color: #909399;">
+                    <el-empty description="目前沒有任何貼文"></el-empty>
+                </div>
+
+                <div v-else>
+                    <el-card v-for="post in posts" :key="post.id" class="post-card" body-style="padding: 20px;">
+                        <!-- 貼文 Header -->
+                        <div class="post-header">
+                            <el-avatar :size="40" :src="post.avatarUrl" style="background: #E6A23C;">
+                                {{ post.author.charAt(0) }}
+                            </el-avatar>
+                            <div class="post-meta">
+                                <span class="author-name">{{ post.author }}</span>
+                                <span class="post-time">{{ formatTime(post.timestamp) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- 貼文內容 -->
+                        <div class="post-body">{{ post.content }}</div>
+
+                        <!-- 互動與評論 -->
+                        <div class="post-actions">
+                            <el-divider content-position="left">
+                                <span style="font-size: 12px; color: #909399;">留言區 ({{ post.comments.length }})</span>
+                            </el-divider>
+                        </div>
+
+                        <!-- 評論列表 -->
+                        <div class="comments-section">
+                            <div v-if="post.comments.length > 0">
+                                <div v-for="comment in post.comments" :key="comment.id" class="comment-item">
+                                    <span class="comment-user">{{ comment.author }}:</span>
+                                    <span>{{ comment.content }}</span>
+                                </div>
+                            </div>
+                            <div v-else style="font-size: 13px; color: #C0C4CC; text-align: center; margin-bottom: 10px;">
+                                搶頭香！成為第一個留言的人。
+                            </div>
+
+                            <!-- 留言輸入框 (僅登入顯示) -->
+                            <div class="mt-2">
+                                <div v-if="isLoggedIn" class="flex-row" style="gap: 8px;">
+                                    <el-input 
+                                        v-model="post.tempComment" 
+                                        placeholder="寫下你的看法..." 
+                                        size="default"
+                                    ></el-input>
+                                    <el-button type="primary" plain @click="submitComment(post)" :disabled="!post.tempComment">送出</el-button>
+                                </div>
+                                <div v-else class="guest-notice">
+                                    <el-link type="primary" @click="openLoginModal">登入</el-link> 後即可參與討論
+                                </div>
+                            </div>
+                        </div>
+                    </el-card>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- 3. 登入 Modal (無路由) -->
+        <el-dialog
+            v-model="loginVisible"
+            title="會員登入"
+            width="90%"
+            style="max-width: 400px;"
+            align-center
+            destroy-on-close
+        >
+            <el-form :model="loginForm" label-position="top" @submit.prevent>
+                <el-form-item label="手機號碼">
+                    <el-input v-model="loginForm.phone" placeholder="例如: 0912345678" prefix-icon="Iphone">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="密碼">
+                    <el-input 
+                        v-model="loginForm.password" 
+                        type="password" 
+                        placeholder="請輸入密碼" 
+                        prefix-icon="Lock"
+                        show-password
+                        @keyup.enter="handleLogin"
+                    ></el-input>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="loginVisible = false">取消</el-button>
+                    <el-button type="primary" @click="handleLogin" :loading="isLoginLoading">
+                        登入
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
+
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed } = Vue;
+        const { ElMessage, ElNotification } = ElementPlus;
+        const { User, EditPen, ArrowDown, Iphone, Lock } = ElementPlusIconsVue;
+
+        const app = createApp({
+            setup() {
+                // --- 狀態 State ---
+                const isLoggedIn = ref(false);
+                const loginVisible = ref(false);
+                const isLoginLoading = ref(false);
+                const newPostContent = ref('');
+                
+                // 模擬當前使用者
+                const currentUser = ref({
+                    name: '',
+                    id: ''
+                });
+
+                // 登入表單
+                const loginForm = reactive({
+                    phone: '',
+                    password: ''
+                });
+
+                // 模擬資料庫 (Mock Data)
+                const posts = ref([
+                    {
+                        id: 1,
+                        author: '系統管理員',
+                        avatarUrl: '', 
+                        content: '歡迎來到 Social Platform！這裡是一個 SPA (單頁應用) 的 UI 預覽。目前您看到的是「訪客視角」，請嘗試點擊右上角登入來體驗完整功能。',
+                        timestamp: new Date(Date.now() - 3600000), // 1小時前
+                        comments: [
+                            { id: 101, author: '路人A', content: '介面看起來很清爽！' },
+                            { id: 102, author: '路人B', content: '測試一下留言功能。' }
+                        ],
+                        tempComment: ''
+                    },
+                    {
+                        id: 2,
+                        author: '測試人員',
+                        avatarUrl: '',
+                        content: '這是一篇範例貼文。不需要路由跳轉，所有的互動都在同一個頁面上完成。',
+                        timestamp: new Date(Date.now() - 86400000), // 1天前
+                        comments: [],
+                        tempComment: ''
+                    }
+                ]);
+
+                // --- 方法 Methods ---
+
+                const openLoginModal = () => {
+                    loginForm.phone = '';
+                    loginForm.password = '';
+                    loginVisible.value = true;
+                };
+
+                const handleLogin = () => {
+                    if(!loginForm.phone || !loginForm.password) {
+                        ElMessage.warning('請輸入手機與密碼');
+                        return;
+                    }
+                    
+                    isLoginLoading.value = true;
+
+                    // 模擬 API 請求延遲
+                    setTimeout(() => {
+                        isLoggedIn.value = true;
+                        currentUser.value = {
+                            name: 'User_' + loginForm.phone.slice(-4), // 假裝用手機末四碼當名字
+                            id: 'u_' + Date.now()
+                        };
+                        isLoginLoading.value = false;
+                        loginVisible.value = false;
+                        
+                        ElNotification({
+                            title: '登入成功',
+                            message: `歡迎回來，${currentUser.value.name}！現在您可以發文了。`,
+                            type: 'success',
+                        });
+                    }, 800);
+                };
+
+                const logout = () => {
+                    isLoggedIn.value = false;
+                    currentUser.value = {};
+                    ElMessage.info('已登出');
+                };
+
+                const submitPost = () => {
+                    if(!newPostContent.value.trim()) return;
+
+                    const newPost = {
+                        id: Date.now(),
+                        author: currentUser.value.name,
+                        avatarUrl: '',
+                        content: newPostContent.value,
+                        timestamp: new Date(),
+                        comments: [],
+                        tempComment: ''
+                    };
+
+                    // 新貼文插在最前面
+                    posts.value.unshift(newPost);
+                    newPostContent.value = '';
+                    ElMessage.success('貼文發佈成功！');
+                };
+
+                const submitComment = (post) => {
+                    if(!post.tempComment || !post.tempComment.trim()) return;
+
+                    const newComment = {
+                        id: Date.now(),
+                        author: currentUser.value.name,
+                        content: post.tempComment
+                    };
+
+                    post.comments.push(newComment);
+                    post.tempComment = '';
+                    ElMessage.success('留言已送出');
+                };
+
+                // 工具：簡單的時間格式化
+                const formatTime = (date) => {
+                    return new Date(date).toLocaleString('zh-TW', {
+                        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                    });
+                };
+
+                const resetView = () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                return {
+                    isLoggedIn,
+                    loginVisible,
+                    loginForm,
+                    isLoginLoading,
+                    currentUser,
+                    newPostContent,
+                    posts,
+                    // methods
+                    openLoginModal,
+                    handleLogin,
+                    logout,
+                    submitPost,
+                    submitComment,
+                    formatTime,
+                    resetView
+                };
+            }
+        });
+
+        // 註冊所有 Icons
+        for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+            app.component(key, component)
+        }
+
+        app.use(ElementPlus);
+        app.mount('#app');
+    </script>
+</body>
+</html>
