@@ -16,6 +16,7 @@
    - 前端（Nginx 靜態站）：`http://localhost/`
    - API base：`http://localhost/api`
    - Swagger UI（固定路徑）：`http://localhost/api/swagger-ui/index.html`
+   - Health（後端存活檢查）：`http://localhost/api/health`
 
 ## Minimal POC Verification
 

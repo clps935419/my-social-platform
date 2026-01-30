@@ -31,13 +31,14 @@ description: "Task list for feature implementation"
 ## Phase 1: Setup（專案初始化 / 目錄與一鍵啟動骨架）
 
 - [ ] T001 建立目錄結構（DB/、backend/、frontend/、nginx/）於 `DB/README.md`
-- [ ] T002 建立 Docker Compose 骨架（nginx/app/db + networks/volumes + env）於 `docker-compose.yml`
-- [ ] T003 [P] 建立 Nginx 站台設定（靜態站 + `/api/*` 反代）於 `nginx/default.conf`
+- [ ] T002 建立 Docker Compose 骨架（nginx/app/db + networks/volumes + env；後端需可「只用 Docker」啟動，不依賴本機 Java）於 `docker-compose.yml`
+- [ ] T003 [P] 建立 Nginx 站台設定（靜態站 + `/api/*` 反代；保留 `/api` base path 不做 rewrite；確保 `/api/swagger-ui/index.html` 可用）於 `nginx/default.conf`
 - [ ] T004 [P] 建立 DB init 掛載與腳本順序（docker-entrypoint-initdb.d）於 `docker-compose.yml`
 - [ ] T005 [P] 先建立 Biome 規則檔（biome.json）；工具安裝與 npm scripts（format/lint）待 T007 前端骨架完成後補齊
 - [ ] T006 [P] 建立後端 Spring Boot 專案骨架（Maven + Web/JDBC/Validation + springdoc-openapi）於 `backend/pom.xml`
 - [ ] T007 [P] 建立前端 Vue 3 + Vite 專案骨架（含 dev/build scripts）於 `frontend/package.json`
 - [ ] T008 建立環境變數樣板（DB/app secrets）於 `.env.example`
+- [ ] T063 建立 Makefile 指令（build/up/down/logs/ps/clean 等；統一呼叫 docker compose）於 `Makefile`
 
 ---
 
@@ -57,7 +58,9 @@ description: "Task list for feature implementation"
 - [ ] T015 實作全域例外處理（Validation/BadRequest/Unauthorized/Forbidden/NotFound/Conflict/TooManyRequests；不洩漏 SQL/stack）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
 - [ ] T016 建立 Stored Procedure 呼叫基礎封裝（SimpleJdbcCall + named params；禁止 SQL 拼接）於 `backend/src/main/java/com/example/platform/dao/StoredProcedureExecutor.java`
 - [ ] T017 建立 controller 層共用輸入驗證（limit/offset default/max、URL 長度、E.164 normalize helper 介面）於 `backend/src/main/java/com/example/platform/api/validation/RequestValidators.java`
-- [ ] T018 設定 Swagger/OpenAPI 對外固定路徑可用（springdoc 設定 + 確保 nginx `/api` 反代可到 `/swagger-ui/index.html`）於 `backend/src/main/resources/application.yml`
+- [ ] T018 設定 Swagger/OpenAPI 對外固定路徑可用（後端 base path 固定為 `/api`；springdoc 路徑採預設並可經 nginx 對外存取 `/api/swagger-ui/index.html`）於 `backend/src/main/resources/application.yml`
+- [ ] T064 建立後端容器 dev 啟動/熱更新機制（不需本機 Java；以「容器內 Maven 執行 + spring-boot-devtools + source volume mount」為準；修改程式碼可自動重新編譯並重啟）於 `docker-compose.yml`
+- [ ] T065 建立 Health API（不需 DB、無副作用；用於驗證後端確實在跑；回應含 status 與 UTC time）於 `backend/src/main/java/com/example/platform/api/HealthController.java`
 
 ### Frontend（共用框架：API client / Query client）
 
