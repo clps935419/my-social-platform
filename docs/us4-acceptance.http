@@ -1,0 +1,136 @@
+### User Story 4 - Comments Creation Acceptance Tests
+### Base URL: http://localhost/api
+### Prerequisites: 
+### - Run this after Phase 5 (US3) is complete
+### - Requires existing posts and authenticated users from seed data or previous tests
+### - Get access token from login endpoint first
+
+### 1. Create comment on existing post (success)
+# @name createComment
+POST http://localhost/api/posts/{{postId}}/comments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "content": "This is a test comment on the post"
+}
+
+### Expected: 201 Created with comment details including commentId, postId, author, content, createdAt
+
+###
+
+### 2. Create comment without authentication (401)
+POST http://localhost/api/posts/{{postId}}/comments
+Content-Type: application/json
+
+{
+  "content": "This should fail without auth"
+}
+
+### Expected: 401 Unauthorized - Authentication required
+
+###
+
+### 3. Create comment with empty content (400)
+POST http://localhost/api/posts/{{postId}}/comments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "content": ""
+}
+
+### Expected: 400 Bad Request - Content is required
+
+###
+
+### 4. Create comment with only whitespace (400)
+POST http://localhost/api/posts/{{postId}}/comments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "content": "   "
+}
+
+### Expected: 400 Bad Request - Content cannot be empty
+
+###
+
+### 5. Create comment on non-existent post (404)
+POST http://localhost/api/posts/00000000-0000-0000-0000-000000000000/comments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "content": "Comment on non-existent post"
+}
+
+### Expected: 404 Not Found - Post not found
+
+###
+
+### 6. Create comment on soft-deleted post (404)
+# First, create and delete a post (requires author access token)
+# @name createTestPost
+POST http://localhost/api/posts
+Content-Type: application/json
+Authorization: Bearer {{authorAccessToken}}
+
+{
+  "content": "This post will be deleted for testing"
+}
+
+###
+
+# @name deleteTestPost
+DELETE http://localhost/api/posts/{{createTestPost.response.body.postId}}
+Authorization: Bearer {{authorAccessToken}}
+
+###
+
+# Now try to comment on the deleted post (should fail)
+POST http://localhost/api/posts/{{createTestPost.response.body.postId}}/comments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "content": "Comment on deleted post"
+}
+
+### Expected: 404 Not Found - Post not found
+
+###
+
+### 7. Get comments list includes newly created comment (verify)
+GET http://localhost/api/posts/{{postId}}/comments?limit=20&offset=0
+
+### Expected: 200 OK with list containing the comment created in test #1
+
+###
+
+### 8. Get comments on soft-deleted post (404)
+GET http://localhost/api/posts/{{createTestPost.response.body.postId}}/comments
+
+### Expected: 404 Not Found - Post not found
+
+###
+
+### Setup Instructions:
+### 1. Replace {{postId}} with an actual post ID from seed data or create a new post
+### 2. Replace {{accessToken}} with a valid JWT token from login
+### 3. Replace {{authorAccessToken}} with a token for a user who can create/delete posts
+### 4. Run tests sequentially to ensure proper setup
+
+### Example setup:
+# Login first
+# @name login
+POST http://localhost/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345678",
+  "password": "password123"
+}
+
+### Use the accessToken from login response in subsequent requests

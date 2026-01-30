@@ -194,7 +194,7 @@ description: "Task list for feature implementation"
 
 ### Implementation
 
-- [ ] T055 [US4] 新增建立留言 SP（若貼文 deleted 則 404；回 Comment）於 `DB/210_sp_comment.sql`
+- [x] T055 [US4] 新增建立留言 SP（若貼文 deleted 則 404；回 Comment）於 `DB/210_sp_comment.sql`
 	- SP 名稱：`sp_comment_create`
 	- Params（named）：`p_actor_user_id (uuid)`, `p_post_id (uuid)`, `p_content (text)`
 	- 規則：
@@ -203,7 +203,7 @@ description: "Task list for feature implementation"
 		- 後端 404/驗證判斷來源必須由 SP 處理（禁止為了判斷狀態而額外查 posts 表）
 	- Return（1 row）：回傳 `Comment`（欄位以 OpenAPI schema 為準；時間為 UTC ISO 8601 含 `Z`）
 
-- [ ] T056 [US4] 實作 POST /posts/{postId}/comments（需登入；deleted post → 404）於 `backend/src/main/java/com/example/platform/api/CommentController.java`
+- [x] T056 [US4] 實作 POST /posts/{postId}/comments（需登入；deleted post → 404）於 `backend/src/main/java/com/example/platform/api/CommentController.java`
 	- 成功：回 201 + `Comment`（response 以 OpenAPI 為準）
 	- 未登入：回 401
 	- `postId` 不存在或貼文已軟刪除：回 404（判斷依 `sp_comment_create`；禁止自行 SQL 查表）
@@ -212,11 +212,11 @@ description: "Task list for feature implementation"
 - [ ] T057 [P] [US4] 建立前端新增留言 UI（登入可輸入送出；成功後刷新列表）於 `frontend/src/components/CreateCommentForm.vue`
 	- XSS 最小規則：留言內容一律以純文字顯示（禁止使用 `v-html`）；使用 Vue 預設插值輸出即可。完整 XSS hardening 見 Phase 7（T060）。
 
-- [ ] T058 [US4] 建立 US4 可重跑驗收腳本（含成功案例；未登入 401、deleted post 404）於 `docs/us4-acceptance.http`
+- [x] T058 [US4] 建立 US4 可重跑驗收腳本（含成功案例；未登入 401、deleted post 404）於 `docs/us4-acceptance.http`
 	- 成功案例：對未刪除貼文 POST comment 成功（201），再 GET comments 能看到新增留言
 	- 失敗案例：未登入 POST → 401；貼文軟刪除後 GET/POST comments → 404
 
-- [ ] T067 [P] [US4] 新增列表排序 query 參數（支援 newest/oldest；不破壞現有預設排序）並同步更新契約/文件
+- [x] T067 [P] [US4] 新增列表排序 query 參數（支援 newest/oldest；不破壞現有預設排序）並同步更新契約/文件
 	- 影響 endpoints：`GET /api/posts`、`GET /api/posts/{postId}/comments`
 	- 契約：以 `specs/001-social-platform/contracts/openapi.yaml` 已定義的 `sort` query（newest/oldest + default）為準
 	- DB/Backend：`DB/200_sp_post.sql`、`DB/210_sp_comment.sql` 與對應 Controller/Validator/DAO 需支援該 query（SP-first；不得自行 SQL 拼接）

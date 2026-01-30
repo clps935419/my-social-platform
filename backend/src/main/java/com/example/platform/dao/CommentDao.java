@@ -17,7 +17,7 @@ import java.util.UUID;
 
 /**
  * Data access object for comments
- * Uses stored procedure sp_comment_list_by_post
+ * Uses stored procedures: sp_comment_list_by_post, sp_comment_create
  */
 @Repository
 public class CommentDao extends StoredProcedureExecutor {
@@ -34,13 +34,14 @@ public class CommentDao extends StoredProcedureExecutor {
      * @param postId The post ID to get comments for
      * @param limit Maximum number of comments to return
      * @param offset Number of comments to skip
+     * @param sort Sort order: "newest" or "oldest" (default: "oldest")
      * @return Map with "comments" (List<Comment>), "total" (Integer), "postExists" (Boolean), "postDeleted" (Boolean)
      */
-    public Map<String, Object> listCommentsByPost(UUID postId, int limit, int offset) {
+    public Map<String, Object> listCommentsByPost(UUID postId, int limit, int offset, String sort) {
         // Query the stored procedure
         List<Map<String, Object>> results = getJdbcTemplate().queryForList(
-            "SELECT * FROM sp_comment_list_by_post(?, ?, ?)",
-            postId, limit, offset
+            "SELECT * FROM sp_comment_list_by_post(?, ?, ?, ?)",
+            postId, limit, offset, sort
         );
         
         Map<String, Object> result = new HashMap<>();
@@ -120,5 +121,51 @@ public class CommentDao extends StoredProcedureExecutor {
         comment.setAuthor(author);
         
         return comment;
+    }
+    
+    /**
+     * Create a new comment on a post using sp_comment_create stored procedure
+     * 
+     * @param actorUserId The user ID creating the comment
+     * @param postId The post ID to comment on
+     * @param content The comment content
+     * @return Map with "comment" (Comment), "postExists" (Boolean), "postDeleted" (Boolean)
+     */
+    public Map<String, Object> createComment(UUID actorUserId, UUID postId, String content) {
+        // Query the stored procedure
+        List<Map<String, Object>> results = getJdbcTemplate().queryForList(
+            "SELECT * FROM sp_comment_create(?, ?, ?)",
+            actorUserId, postId, content
+        );
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        // Check if we got a result
+        if (results.isEmpty()) {
+            result.put("comment", null);
+            result.put("postExists", false);
+            result.put("postDeleted", false);
+            return result;
+        }
+        
+        // Get first row with metadata
+        Map<String, Object> firstRow = results.get(0);
+        Boolean postExists = (Boolean) firstRow.get("post_exists");
+        Boolean postDeleted = (Boolean) firstRow.get("post_deleted");
+        
+        result.put("postExists", postExists != null ? postExists : false);
+        result.put("postDeleted", postDeleted != null ? postDeleted : false);
+        
+        // If post doesn't exist or is deleted, return without comment
+        if (!Boolean.TRUE.equals(postExists) || Boolean.TRUE.equals(postDeleted)) {
+            result.put("comment", null);
+            return result;
+        }
+        
+        // Parse the comment
+        Comment comment = mapRowToComment(firstRow);
+        result.put("comment", comment);
+        
+        return result;
     }
 }
