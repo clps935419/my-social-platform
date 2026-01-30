@@ -34,7 +34,7 @@ description: "Task list for feature implementation"
 - [ ] T002 建立 Docker Compose 骨架（nginx/app/db + networks/volumes + env）於 `docker-compose.yml`
 - [ ] T003 [P] 建立 Nginx 站台設定（靜態站 + `/api/*` 反代）於 `nginx/default.conf`
 - [ ] T004 [P] 建立 DB init 掛載與腳本順序（docker-entrypoint-initdb.d）於 `docker-compose.yml`
-- [ ] T005 [P] 建立 Biome 設定與腳本（format/lint）於 `biome.json`
+- [ ] T005 [P] 先建立 Biome 規則檔（biome.json）；工具安裝與 npm scripts（format/lint）待 T007 前端骨架完成後補齊
 - [ ] T006 [P] 建立後端 Spring Boot 專案骨架（Maven + Web/JDBC/Validation + springdoc-openapi）於 `backend/pom.xml`
 - [ ] T007 [P] 建立前端 Vue 3 + Vite 專案骨架（含 dev/build scripts）於 `frontend/package.json`
 - [ ] T008 建立環境變數樣板（DB/app secrets）於 `.env.example`
