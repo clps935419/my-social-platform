@@ -20,6 +20,8 @@ server:
   port: 8080
   servlet:
     context-path: /api
+  # Enable forward headers for reverse proxy support
+  forward-headers-strategy: framework
   error:
     # Disable default error page (whitelabel)
     whitelabel:
@@ -36,6 +38,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui/index.html
     enabled: true
+  # Configure for reverse proxy setup
+  use-root-path: false
   show-actuator: false
 
 # Logging

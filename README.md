@@ -211,6 +211,7 @@ NGINX_PORT=80
 - [Implementation Summary](./reports/IMPLEMENTATION_SUMMARY.md) - Detailed implementation report
 - [Deployment Instructions](./reports/DEPLOYMENT_INSTRUCTIONS.md) - Complete deployment guide
 - [Phase 1 & 2 Status](./reports/PHASE1_PHASE2_STATUS.md) - Detailed task completion status
+- [Swagger Reverse Proxy Guide](./docs/SWAGGER_REVERSE_PROXY.md) - Swagger UI behind nginx troubleshooting
 - [Specification](./specs/001-social-platform/spec.md) - Feature requirements
 - [Technical Plan](./specs/001-social-platform/plan.md) - Architecture decisions
 - [Data Model](./specs/001-social-platform/data-model.md) - Database schema
