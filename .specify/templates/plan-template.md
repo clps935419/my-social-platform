@@ -31,7 +31,14 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Gates（計畫中必須逐項明確確認）：
+- 技術棧：Vue 3 + Vite、Spring Boot REST、Maven
+- 資料庫：PostgreSQL
+- 資料存取：僅允許 Stored Procedure（SP-first），優先用 JdbcTemplate/SimpleJdbcCall 呼叫；禁止 ORM 直接 CRUD；禁止 SQL 字串拼接
+- 部署：Docker Compose（nginx/app/db），且 Nginx 需反代 `/api/*`
+- API 文件：OpenAPI 3 + Swagger UI（Compose 啟動後可存取）
+- DB 腳本：DDL/DML/SP 腳本放在 `DB/`
+- 安全底線：防 SQLi（參數化）、防 XSS（禁止不安全渲染）、密碼 salt+hash、錯誤不洩漏敏感資訊
 
 ## Project Structure
 
