@@ -32,24 +32,37 @@ public class PostDao extends StoredProcedureExecutor {
      * 
      * @param limit Maximum number of posts to return
      * @param offset Number of posts to skip
+     * @param authorUserId Optional author user ID to filter by
      * @return Map with "posts" (List<Post>) and "total" (Integer)
      */
-    public Map<String, Object> listPosts(int limit, int offset) {
+    public Map<String, Object> listPosts(int limit, int offset, String authorUserId) {
         Map<String, Object> params = new HashMap<>();
         params.put("p_limit", limit);
         params.put("p_offset", offset);
         
-        // Query the stored procedure
-        List<Post> posts = getJdbcTemplate().query(
-            "SELECT * FROM sp_post_list(?, ?)",
-            new Object[]{limit, offset},
-            new PostRowMapper()
-        );
+        // Query the stored procedure with optional author filter
+        List<Post> posts;
+        if (authorUserId != null) {
+            posts = getJdbcTemplate().query(
+                "SELECT * FROM sp_post_list(?, ?, ?)",
+                new Object[]{limit, offset, java.util.UUID.fromString(authorUserId)},
+                new PostRowMapper()
+            );
+        } else {
+            posts = getJdbcTemplate().query(
+                "SELECT * FROM sp_post_list(?, ?, NULL)",
+                new Object[]{limit, offset},
+                new PostRowMapper()
+            );
+        }
         
         // Extract total count from first row (all rows have same total_count)
         int total = posts.isEmpty() ? 0 : 
             getJdbcTemplate().queryForObject(
-                "SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL",
+                authorUserId != null 
+                    ? "SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL AND author_user_id = ?"
+                    : "SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL",
+                authorUserId != null ? new Object[]{java.util.UUID.fromString(authorUserId)} : new Object[]{},
                 Integer.class
             );
         
@@ -57,6 +70,124 @@ public class PostDao extends StoredProcedureExecutor {
         result.put("posts", posts);
         result.put("total", total);
         return result;
+    }
+    
+    /**
+     * Create a new post
+     * 
+     * @param authorUserId Author's user ID
+     * @param content Post content (required, not blank)
+     * @param imageUrl Optional image URL
+     * @return Created Post
+     */
+    public Post createPost(String authorUserId, String content, String imageUrl) {
+        List<Post> posts = getJdbcTemplate().query(
+            "SELECT * FROM sp_post_create(?, ?, ?)",
+            new Object[]{java.util.UUID.fromString(authorUserId), content, imageUrl},
+            new PostRowMapper()
+        );
+        
+        if (posts.isEmpty()) {
+            throw new RuntimeException("Failed to create post");
+        }
+        
+        return posts.get(0);
+    }
+    
+    /**
+     * Update a post (author only)
+     * 
+     * @param actorUserId User attempting the update
+     * @param postId Post ID to update
+     * @param content New content (nullable for partial update)
+     * @param imageUrl New image URL (nullable for partial update)
+     * @return Map with "post" (Post or null), "exists" (boolean), "deleted" (boolean), "isAuthor" (boolean)
+     */
+    public Map<String, Object> updatePost(String actorUserId, String postId, String content, String imageUrl) {
+        List<Map<String, Object>> results = getJdbcTemplate().query(
+            "SELECT * FROM sp_post_update(?, ?, ?, ?)",
+            new Object[]{
+                java.util.UUID.fromString(actorUserId),
+                java.util.UUID.fromString(postId),
+                content,
+                imageUrl
+            },
+            (rs, rowNum) -> {
+                Map<String, Object> result = new HashMap<>();
+                
+                // Extract metadata
+                result.put("exists", rs.getBoolean("post_exists"));
+                result.put("deleted", rs.getBoolean("post_deleted"));
+                result.put("isAuthor", rs.getBoolean("is_author"));
+                
+                // Extract post if available
+                String returnedPostId = rs.getString("post_id");
+                if (returnedPostId != null) {
+                    Post post = new Post();
+                    post.setPostId(returnedPostId);
+                    post.setContent(rs.getString("content"));
+                    post.setImage(rs.getString("image_url"));
+                    
+                    OffsetDateTime createdAt = rs.getObject("created_at", OffsetDateTime.class);
+                    if (createdAt != null) {
+                        post.setCreatedAt(ISO_FORMATTER.format(createdAt));
+                    }
+                    
+                    OffsetDateTime updatedAt = rs.getObject("updated_at", OffsetDateTime.class);
+                    if (updatedAt != null) {
+                        post.setUpdatedAt(ISO_FORMATTER.format(updatedAt));
+                    }
+                    
+                    Author author = new Author();
+                    author.setUserId(rs.getString("author_user_id"));
+                    author.setUserName(rs.getString("author_user_name"));
+                    author.setCoverImage(rs.getString("author_cover_image_url"));
+                    post.setAuthor(author);
+                    
+                    result.put("post", post);
+                } else {
+                    result.put("post", null);
+                }
+                
+                return result;
+            }
+        );
+        
+        if (results.isEmpty()) {
+            throw new RuntimeException("Failed to execute update");
+        }
+        
+        return results.get(0);
+    }
+    
+    /**
+     * Soft delete a post (author only)
+     * 
+     * @param actorUserId User attempting the deletion
+     * @param postId Post ID to delete
+     * @return Map with "exists" (boolean), "deleted" (boolean), "isAuthor" (boolean)
+     */
+    public Map<String, Object> deletePost(String actorUserId, String postId) {
+        List<Map<String, Object>> results = getJdbcTemplate().query(
+            "SELECT * FROM sp_post_soft_delete(?, ?)",
+            new Object[]{
+                java.util.UUID.fromString(actorUserId),
+                java.util.UUID.fromString(postId)
+            },
+            (rs, rowNum) -> {
+                Map<String, Object> result = new HashMap<>();
+                result.put("exists", rs.getBoolean("post_exists"));
+                result.put("deleted", rs.getBoolean("post_deleted"));
+                result.put("isAuthor", rs.getBoolean("is_author"));
+                return result;
+            }
+        );
+        
+        if (results.isEmpty()) {
+            throw new RuntimeException("Failed to execute delete");
+        }
+        
+        return results.get(0);
     }
     
     /**

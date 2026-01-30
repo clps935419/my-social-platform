@@ -131,13 +131,13 @@ description: "Task list for feature implementation"
 
 ### Implementation
 
-- [ ] T046 [US3] 新增建立貼文 SP（回 Post；image URL<=2048）於 `DB/200_sp_post.sql`
+- [x] T046 [US3] 新增建立貼文 SP（回 Post；image URL<=2048）於 `DB/200_sp_post.sql`
 	- SP 名稱：`sp_post_create`
 	- Params（named）：`p_author_user_id (uuid)`, `p_content (text)`, `p_image_url (varchar(2048), nullable)`
 	- 規則：`p_content` 必填且不得全空白；`p_image_url` 若提供，需 http/https 且長度 <= 2048（不收 Base64）
 	- Return（1 row）：`post_id, author_user_id, author_user_name, author_cover_image_url, content, image_url, created_at, updated_at`
 
-- [ ] T047 [US3] 新增更新貼文 SP（作者檢查；非作者對應 403）於 `DB/200_sp_post.sql`
+- [x] T047 [US3] 新增更新貼文 SP（作者檢查；非作者對應 403）於 `DB/200_sp_post.sql`
 	- SP 名稱：`sp_post_update`
 	- Params（named）：`p_actor_user_id (uuid)`, `p_post_id (uuid)`, `p_content (text, nullable)`, `p_image_url (varchar(2048), nullable)`
 	- 規則：
@@ -153,7 +153,7 @@ description: "Task list for feature implementation"
 		- `is_author=false` → API 回 403
 		- 其他 → 回 200 + Post
 
-- [ ] T048 [US3] 新增軟刪除貼文 SP（作者檢查；deleted_at 設定）於 `DB/200_sp_post.sql`
+- [x] T048 [US3] 新增軟刪除貼文 SP（作者檢查；deleted_at 設定）於 `DB/200_sp_post.sql`
 	- SP 名稱：`sp_post_soft_delete`
 	- Params（named）：`p_actor_user_id (uuid)`, `p_post_id (uuid)`
 	- 規則：
@@ -162,23 +162,23 @@ description: "Task list for feature implementation"
 		- 若為作者且未刪除 → 設定 `deleted_at = now()`、更新 `updated_at`
 	- Return（1 row + meta）：`post_exists (boolean)`, `post_deleted (boolean)`, `is_author (boolean)`
 
-- [ ] T049 [US3] 實作 POST /posts（需登入；回 201）於 `backend/src/main/java/com/example/platform/api/PostController.java`
+- [x] T049 [US3] 實作 POST /posts（需登入；回 201）於 `backend/src/main/java/com/example/platform/api/PostController.java`
 	- Request/Response 以 OpenAPI 為準：`CreatePostRequest` → `Post`
 	- 驗證：`content` 必填且不得全空白；`image` 若提供需 http/https 且長度 <= 2048
 	- 授權來源：從 JWT Bearer 建立的 principal 取得 `userId`（作者）並傳入 `sp_post_create`
 
-- [ ] T050 [US3] 實作 PATCH /posts/{postId}（需登入且作者；403/404）於 `backend/src/main/java/com/example/platform/api/PostController.java`
+- [x] T050 [US3] 實作 PATCH /posts/{postId}（需登入且作者；403/404）於 `backend/src/main/java/com/example/platform/api/PostController.java`
 	- Request/Response 以 OpenAPI 為準：`UpdatePostRequest` → `Post`
 	- 驗證：`content` 若提供不得全空白；`image` 若提供需 http/https 且長度 <= 2048
 	- 403/404 判斷必須依 `sp_post_update` 回傳 meta（不得自行 SQL 查表）
 
-- [ ] T051 [US3] 實作 DELETE /posts/{postId}（需登入且作者；軟刪除；204/403/404）於 `backend/src/main/java/com/example/platform/api/PostController.java`
+- [x] T051 [US3] 實作 DELETE /posts/{postId}（需登入且作者；軟刪除；204/403/404）於 `backend/src/main/java/com/example/platform/api/PostController.java`
 	- 行為：成功軟刪除回 204
 	- 重複呼叫：若貼文不存在或已刪除 → 回 404（不做重複刪除）
 	- 403/404 判斷必須依 `sp_post_soft_delete` 回傳 meta（不得自行 SQL 查表）
 - [ ] T052 [P] [US3] 建立前端發文 UI（表單 + 呼叫 POST /api/posts）於 `frontend/src/components/CreatePostForm.vue`
 - [ ] T053 [P] [US3] 建立前端貼文管理 UI（作者可見 edit/delete）於 `frontend/src/components/PostActions.vue`
-- [ ] T054 [US3] 建立 US3 可重跑驗收腳本（兩帳號驗證 403；刪後列表不顯示）於 `docs/us3-acceptance.http`
+- [x] T054 [US3] 建立 US3 可重跑驗收腳本（兩帳號驗證 403；刪後列表不顯示）於 `docs/us3-acceptance.http`
 
 **Checkpoint**：US3 腳本可重跑且通過。
 

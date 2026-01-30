@@ -1,0 +1,209 @@
+### US3 Acceptance Tests
+### User Story 3: 已登入使用者可發文並管理自己的貼文
+
+# Test environment
+@baseUrl = http://localhost/api
+@user1Phone = +886901234501
+@user1Pass = Pass1234
+@user2Phone = +886901234502
+@user2Pass = Pass2234
+
+### Step 1: Register user1 (Author A)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user1Phone}}",
+  "userName": "TestUser1",
+  "password": "{{user1Pass}}"
+}
+
+### Step 2: Login user1
+# @name loginUser1
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user1Phone}}",
+  "password": "{{user1Pass}}"
+}
+
+### Capture user1 token
+@user1Token = {{loginUser1.response.body.accessToken}}
+
+### Step 3: Register user2 (User B who will try to edit/delete)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user2Phone}}",
+  "userName": "TestUser2",
+  "password": "{{user2Pass}}"
+}
+
+### Step 4: Login user2
+# @name loginUser2
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user2Phone}}",
+  "password": "{{user2Pass}}"
+}
+
+### Capture user2 token
+@user2Token = {{loginUser2.response.body.accessToken}}
+
+### Step 5: User1 creates a post
+# @name createPost
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "This is a test post from User1",
+  "image": "https://example.com/image.jpg"
+}
+
+### Capture postId
+@postId = {{createPost.response.body.postId}}
+
+### Step 6: Verify post appears in list
+GET {{baseUrl}}/posts?limit=20&offset=0
+
+### Step 7: User2 tries to update User1's post (should get 403)
+PATCH {{baseUrl}}/posts/{{postId}}
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+  "content": "User2 trying to edit User1's post"
+}
+
+### Expected: 403 Forbidden
+
+### Step 8: User2 tries to delete User1's post (should get 403)
+DELETE {{baseUrl}}/posts/{{postId}}
+Authorization: Bearer {{user2Token}}
+
+### Expected: 403 Forbidden
+
+### Step 9: User1 updates their own post (should succeed)
+PATCH {{baseUrl}}/posts/{{postId}}
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Updated content by User1"
+}
+
+### Expected: 200 OK with updated post
+
+### Step 10: User1 updates post with partial data (only image)
+PATCH {{baseUrl}}/posts/{{postId}}
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "image": "https://example.com/new-image.jpg"
+}
+
+### Expected: 200 OK, content unchanged, image updated
+
+### Step 11: Verify post is updated in list
+GET {{baseUrl}}/posts?limit=20&offset=0
+
+### Step 12: User1 soft deletes their own post (should succeed)
+DELETE {{baseUrl}}/posts/{{postId}}
+Authorization: Bearer {{user1Token}}
+
+### Expected: 204 No Content
+
+### Step 13: Verify deleted post doesn't appear in list
+GET {{baseUrl}}/posts?limit=20&offset=0
+
+### Step 14: Try to delete already deleted post (should get 404)
+DELETE {{baseUrl}}/posts/{{postId}}
+Authorization: Bearer {{user1Token}}
+
+### Expected: 404 Not Found
+
+### Step 15: Try to update deleted post (should get 404)
+PATCH {{baseUrl}}/posts/{{postId}}
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Trying to update deleted post"
+}
+
+### Expected: 404 Not Found
+
+### Step 16: Create post without auth (should get 401)
+POST {{baseUrl}}/posts
+Content-Type: application/json
+
+{
+  "content": "Unauthenticated post attempt"
+}
+
+### Expected: 401 Unauthorized
+
+### Step 17: Create post with empty content (should get 400)
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "   "
+}
+
+### Expected: 400 Bad Request
+
+### Step 18: Create post with invalid image URL (should get 400)
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Test post",
+  "image": "not-a-url"
+}
+
+### Expected: 400 Bad Request
+
+### Step 19: Create post with image URL too long (should get 400)
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Test post",
+  "image": "https://example.com/verylongurl/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg"
+}
+
+### Expected: 400 Bad Request
+
+### Step 20: Test successful post creation with valid data
+# @name createValidPost
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Valid post content",
+  "image": "https://example.com/valid-image.jpg"
+}
+
+### Expected: 201 Created with post data
+
+### Step 21: Create post without image (optional field)
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Post without image"
+}
+
+### Expected: 201 Created
