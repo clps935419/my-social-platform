@@ -28,7 +28,9 @@
 
 **Primary Dependencies**:
 - Backend：spring-boot-starter-web、spring-boot-starter-validation、spring-boot-starter-jdbc、springdoc-openapi（Swagger UI）
-- Frontend：TanStack Query（server state）、Element Plus（UI；非硬性）、Vue Router（若需要頁面路由）
+- Frontend：Vue 3 + Vite、TanStack Query（server state；採 @tanstack/vue-query）、Axios、Vue Router（若需要頁面路由）
+
+UI 框架：Element Plus。
 
 **Storage**: PostgreSQL 16（Stored Procedures）
 

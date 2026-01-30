@@ -66,6 +66,12 @@ description: "Task list for feature implementation"
 
 - [X] T019 建立 API client（baseURL=/api；統一錯誤處理；預留加 Authorization header）於 `frontend/src/api/http.ts`
 - [X] T020 建立 TanStack Query client 與 Provider（QueryClient + error boundary 最小化）於 `frontend/src/main.ts`
+- [ ] T071 [P] 定案並導入 UI 框架 Element Plus（安裝 `element-plus` + `@element-plus/icons-vue`；釘選版本；加入 Biome-friendly 的 import 範例）於 `frontend/package.json`
+- [ ] T072 [P] 在前端初始化 Element Plus（`app.use(ElementPlus)` + 引入 CSS；註冊 icons（選配））於 `frontend/src/main.js`
+- [ ] T073 [P] 建立最小 UI 版型骨架（App layout：Header/Main/Container；用 Element Plus 元件）於 `frontend/src/App.vue`
+- [ ] T068 [P] 導入 Hey API OpenAPI TypeScript 產碼工具（`@hey-api/openapi-ts`；釘選版本）並新增 `gen:sdk` script 於 `frontend/package.json`
+- [ ] T069 [P] 新增 Hey API 設定檔（input 使用動態 URL：`http://localhost:8080/api/api-docs`；output 建議 `frontend/src/api/generated`；plugins 使用 `@tanstack/vue-query` + `@hey-api/client-axios`）於 `frontend/openapi-ts.config.mjs`
+- [ ] T070 [P] 補齊「SDK 產碼流程」文件（是否提交產物、如何重產；產物視為 build artifact 不手改）於 `README.md`
 
 **Checkpoint**：`docker compose up -d --build` 後可打開 `http://localhost/api/swagger-ui/index.html`（即使 endpoints 尚未全實作也需能進 Swagger UI）。
 
