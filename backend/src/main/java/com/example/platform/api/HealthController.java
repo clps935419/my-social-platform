@@ -2,6 +2,8 @@ package com.example.platform.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,15 +25,20 @@ import java.util.Map;
 @Tag(name = "Health", description = "Health check endpoints")
 public class HealthController {
     
+    private static final Logger logger = LoggerFactory.getLogger(HealthController.class);
     private static final DateTimeFormatter ISO_FORMATTER = 
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
     
     @GetMapping
     @Operation(summary = "Health check", description = "Returns service health status and current UTC time")
     public ResponseEntity<Map<String, Object>> health() {
+        logger.info("Health check endpoint called");
+        
         Map<String, Object> response = new HashMap<>();
         response.put("status", "UP");
         response.put("timestamp", ISO_FORMATTER.format(Instant.now()));
+        
+        logger.debug("Health check response: {}", response);
         
         return ResponseEntity.ok(response);
     }
