@@ -2,10 +2,11 @@
 
 -- sp_post_list: List posts (newest first, exclude soft-deleted)
 -- Returns: posts array with author info, total count
--- Parameters: p_limit (default 20), p_offset (default 0)
+-- Parameters: p_limit (default 20), p_offset (default 0), p_author_user_id (optional filter)
 CREATE OR REPLACE FUNCTION sp_post_list(
     p_limit INTEGER DEFAULT 20,
-    p_offset INTEGER DEFAULT 0
+    p_offset INTEGER DEFAULT 0,
+    p_author_user_id UUID DEFAULT NULL
 )
 RETURNS TABLE(
     post_id UUID,
@@ -23,10 +24,11 @@ AS $$
 DECLARE
     v_total_count BIGINT;
 BEGIN
-    -- Get total count of non-deleted posts
+    -- Get total count of non-deleted posts (with optional author filter)
     SELECT COUNT(*) INTO v_total_count
     FROM posts
-    WHERE deleted_at IS NULL;
+    WHERE deleted_at IS NULL
+      AND (p_author_user_id IS NULL OR posts.author_user_id = p_author_user_id);
     
     -- Return posts with author info
     RETURN QUERY
@@ -43,6 +45,7 @@ BEGIN
     FROM posts p
     INNER JOIN users u ON p.author_user_id = u.user_id
     WHERE p.deleted_at IS NULL
+      AND (p_author_user_id IS NULL OR p.author_user_id = p_author_user_id)
     ORDER BY p.created_at DESC
     LIMIT p_limit
     OFFSET p_offset;

@@ -32,24 +32,37 @@ public class PostDao extends StoredProcedureExecutor {
      * 
      * @param limit Maximum number of posts to return
      * @param offset Number of posts to skip
+     * @param authorUserId Optional author user ID to filter by
      * @return Map with "posts" (List<Post>) and "total" (Integer)
      */
-    public Map<String, Object> listPosts(int limit, int offset) {
+    public Map<String, Object> listPosts(int limit, int offset, String authorUserId) {
         Map<String, Object> params = new HashMap<>();
         params.put("p_limit", limit);
         params.put("p_offset", offset);
         
-        // Query the stored procedure
-        List<Post> posts = getJdbcTemplate().query(
-            "SELECT * FROM sp_post_list(?, ?)",
-            new Object[]{limit, offset},
-            new PostRowMapper()
-        );
+        // Query the stored procedure with optional author filter
+        List<Post> posts;
+        if (authorUserId != null) {
+            posts = getJdbcTemplate().query(
+                "SELECT * FROM sp_post_list(?, ?, ?)",
+                new Object[]{limit, offset, java.util.UUID.fromString(authorUserId)},
+                new PostRowMapper()
+            );
+        } else {
+            posts = getJdbcTemplate().query(
+                "SELECT * FROM sp_post_list(?, ?, NULL)",
+                new Object[]{limit, offset},
+                new PostRowMapper()
+            );
+        }
         
         // Extract total count from first row (all rows have same total_count)
         int total = posts.isEmpty() ? 0 : 
             getJdbcTemplate().queryForObject(
-                "SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL",
+                authorUserId != null 
+                    ? "SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL AND author_user_id = ?"
+                    : "SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL",
+                authorUserId != null ? new Object[]{java.util.UUID.fromString(authorUserId)} : new Object[]{},
                 Integer.class
             );
         

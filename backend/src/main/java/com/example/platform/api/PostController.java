@@ -45,21 +45,36 @@ public class PostController {
     @GetMapping
     @Operation(
         summary = "List posts",
-        description = "Get a paginated list of posts (newest first). Excludes soft-deleted posts. Public endpoint, no authentication required."
+        description = "Get a paginated list of posts (newest first). Excludes soft-deleted posts. Public endpoint, no authentication required. Optionally filter by current user's posts using 'mine=true'."
     )
     public ResponseEntity<PostListResponse> listPosts(
         @Parameter(description = "Maximum number of posts to return (1-100, default: 20)")
         @RequestParam(required = false) Integer limit,
         
         @Parameter(description = "Number of posts to skip (default: 0)")
-        @RequestParam(required = false) Integer offset
+        @RequestParam(required = false) Integer offset,
+        
+        @Parameter(description = "Filter to show only current user's posts (requires authentication)")
+        @RequestParam(required = false) Boolean mine,
+        
+        HttpServletRequest httpRequest
     ) {
         // Validate and normalize parameters
         int validatedLimit = RequestValidators.validateLimit(limit);
         int validatedOffset = RequestValidators.validateOffset(offset);
         
+        // Get user ID if filtering by current user
+        String authorUserId = null;
+        if (mine != null && mine) {
+            UUID userId = (UUID) httpRequest.getAttribute("userId");
+            if (userId == null) {
+                throw new UnauthorizedException("Authentication required to filter your own posts");
+            }
+            authorUserId = userId.toString();
+        }
+        
         // Call DAO
-        Map<String, Object> result = postDao.listPosts(validatedLimit, validatedOffset);
+        Map<String, Object> result = postDao.listPosts(validatedLimit, validatedOffset, authorUserId);
         
         @SuppressWarnings("unchecked")
         List<Post> posts = (List<Post>) result.get("posts");

@@ -1,0 +1,80 @@
+### Test for GET /posts with mine=true filter
+### Verifies that users can filter posts to show only their own posts
+
+@baseUrl = http://localhost/api
+@user1Phone = +886901234501
+@user1Pass = Pass1234
+@user2Phone = +886901234502
+@user2Pass = Pass2234
+
+### Step 1: Login as User1
+# @name loginUser1
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user1Phone}}",
+  "password": "{{user1Pass}}"
+}
+
+### Capture user1 token
+@user1Token = {{loginUser1.response.body.accessToken}}
+
+### Step 2: Login as User2
+# @name loginUser2
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user2Phone}}",
+  "password": "{{user2Pass}}"
+}
+
+### Capture user2 token
+@user2Token = {{loginUser2.response.body.accessToken}}
+
+### Step 3: User1 creates a post
+# @name createUser1Post
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: ******
+
+{
+  "content": "User1's post for filter test"
+}
+
+### Step 4: User2 creates a post
+# @name createUser2Post
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: ******
+
+{
+  "content": "User2's post for filter test"
+}
+
+### Step 5: Get all posts (should show both users' posts)
+GET {{baseUrl}}/posts?limit=100
+
+### Step 6: User1 gets only their own posts (mine=true)
+GET {{baseUrl}}/posts?mine=true&limit=100
+Authorization: ******
+
+### Expected: Only User1's posts
+
+### Step 7: User2 gets only their own posts (mine=true)
+GET {{baseUrl}}/posts?mine=true&limit=100
+Authorization: ******
+
+### Expected: Only User2's posts
+
+### Step 8: Try to use mine=true without authentication (should get 401)
+GET {{baseUrl}}/posts?mine=true&limit=100
+
+### Expected: 401 Unauthorized
+
+### Step 9: User1 gets all posts without filter
+GET {{baseUrl}}/posts?limit=100
+Authorization: ******
+
+### Expected: All posts from all users
