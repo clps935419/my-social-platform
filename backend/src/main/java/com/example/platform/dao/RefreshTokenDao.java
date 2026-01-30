@@ -1,6 +1,7 @@
 package com.example.platform.dao;
 
 import com.example.platform.common.UnauthorizedException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class RefreshTokenDao {
     private final StoredProcedureExecutor spExecutor;
     private final JdbcTemplate jdbcTemplate;
 
-    public RefreshTokenDao(StoredProcedureExecutor spExecutor, JdbcTemplate jdbcTemplate) {
+    public RefreshTokenDao(@Qualifier("storedProcedureExecutor") StoredProcedureExecutor spExecutor, JdbcTemplate jdbcTemplate) {
         this.spExecutor = spExecutor;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -30,7 +31,7 @@ public class RefreshTokenDao {
      * Issue a new refresh token
      */
     public RefreshTokenRecord issue(UUID userId, String tokenHash, Instant expiresAt) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_user_id", userId);
         params.put("p_token_hash", tokenHash);
         params.put("p_expires_at", expiresAt);
@@ -43,7 +44,7 @@ public class RefreshTokenDao {
      * Returns token info if valid, null if invalid/expired/revoked
      */
     public ValidatedToken validate(String tokenHash) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_token_hash", tokenHash);
 
         try {
@@ -57,7 +58,7 @@ public class RefreshTokenDao {
      * Rotate refresh token (revoke old, issue new)
      */
     public RotatedToken rotate(String oldTokenHash, String newTokenHash, Instant newExpiresAt) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_old_token_hash", oldTokenHash);
         params.put("p_new_token_hash", newTokenHash);
         params.put("p_new_expires_at", newExpiresAt);
@@ -76,7 +77,7 @@ public class RefreshTokenDao {
      * Revoke refresh token
      */
     public boolean revoke(String tokenHash) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_token_hash", tokenHash);
 
         Boolean result = spExecutor.executeQuery("sp_refresh_token_revoke", params, rs -> rs.getBoolean("success"));

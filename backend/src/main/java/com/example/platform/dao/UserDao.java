@@ -1,6 +1,7 @@
 package com.example.platform.dao;
 
 import com.example.platform.common.ConflictException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class UserDao {
     private final StoredProcedureExecutor spExecutor;
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDao(StoredProcedureExecutor spExecutor, JdbcTemplate jdbcTemplate) {
+    public UserDao(@Qualifier("storedProcedureExecutor") StoredProcedureExecutor spExecutor, JdbcTemplate jdbcTemplate) {
         this.spExecutor = spExecutor;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -32,7 +33,8 @@ public class UserDao {
     public UserProfile register(String phoneE164, String userName, String email, 
                                  String passwordHash, String passwordSalt,
                                  String coverImageUrl, String biography) {
-        Map<String, Object> params = new HashMap<>();
+        // Use LinkedHashMap to preserve parameter order
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_phone_e164", phoneE164);
         params.put("p_user_name", userName);
         params.put("p_email", email);
@@ -56,7 +58,7 @@ public class UserDao {
      * Get user by phone number (for login)
      */
     public UserWithPassword getUserByPhone(String phoneE164) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_phone_e164", phoneE164);
 
         return spExecutor.executeQuery("sp_user_get_by_phone", params, this::mapUserWithPassword);
@@ -66,13 +68,22 @@ public class UserDao {
      * Get user profile by user ID
      */
     public UserProfile getUserProfile(UUID userId) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_user_id", userId);
 
         return spExecutor.executeQuery("sp_user_get_profile", params, this::mapUserProfile);
     }
 
     private UserProfile mapUserProfile(ResultSet rs) throws SQLException {
+        Instant updatedAt = null;
+        try {
+            if (rs.getTimestamp("updated_at") != null) {
+                updatedAt = rs.getTimestamp("updated_at").toInstant();
+            }
+        } catch (SQLException e) {
+            // updated_at column may not exist (e.g., in register response)
+        }
+        
         return new UserProfile(
                 (UUID) rs.getObject("user_id"),
                 rs.getString("phone_e164"),
@@ -81,7 +92,7 @@ public class UserDao {
                 rs.getString("cover_image_url"),
                 rs.getString("biography"),
                 rs.getTimestamp("created_at").toInstant(),
-                rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toInstant() : null
+                updatedAt
         );
     }
 

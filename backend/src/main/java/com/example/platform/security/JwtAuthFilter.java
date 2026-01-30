@@ -17,7 +17,6 @@ import java.util.UUID;
  * Extracts and validates JWT from Authorization header
  * Sets user principal in request attribute for controllers to use
  */
-@Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;

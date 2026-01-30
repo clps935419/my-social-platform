@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Simple rate limiting filter for authentication endpoints
  * Uses in-memory sliding window counter per IP address
  */
-@Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final int maxRequests;
