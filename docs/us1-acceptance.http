@@ -26,6 +26,14 @@ Accept: application/json
 
 ---
 
+### Test 3b: List posts sorted oldest first
+GET http://localhost/api/posts?sort=oldest
+Accept: application/json
+
+### Expected: 200 OK, returns posts sorted by created_at ASC
+
+---
+
 ### Test 4: Invalid limit (too high)
 GET http://localhost/api/posts?limit=200
 Accept: application/json
@@ -69,6 +77,14 @@ Accept: application/json
 
 ---
 
+### Test 8b: List comments sorted newest first
+GET http://localhost/api/posts/00000000-0000-0000-0000-000000000101/comments?sort=newest
+Accept: application/json
+
+### Expected: 200 OK, returns comments sorted by created_at DESC
+
+---
+
 ### Test 9: Comments for non-existent post
 GET http://localhost/api/posts/00000000-0000-0000-0000-999999999999/comments
 Accept: application/json
@@ -84,6 +100,14 @@ Accept: application/json
 
 ### Expected: 400 BAD_REQUEST
 ### Should return: { errorCode: "BAD_REQUEST", message: "Invalid post ID format" }
+
+---
+
+### Test 10b: Invalid sort value
+GET http://localhost/api/posts?sort=wat
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
 
 ---
 
@@ -112,7 +136,7 @@ Accept: application/json
 
 ## Notes
 - All endpoints are PUBLIC (no authentication required)
-- Posts are sorted newest first (created_at DESC)
-- Comments are sorted oldest first (created_at ASC)
+- Posts are sorted newest first by default (created_at DESC); `sort=oldest` switches to ASC
+- Comments are sorted oldest first by default (created_at ASC); `sort=newest` switches to DESC
 - Default pagination: limit=20, offset=0
 - Maximum limit: 100

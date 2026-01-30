@@ -81,6 +81,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/PostSort'
         - name: mine
           in: query
           required: false
@@ -159,6 +160,7 @@ paths:
         - $ref: '#/components/parameters/PostId'
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/CommentSort'
       responses:
         '200':
           description: OK
@@ -203,6 +205,24 @@ components:
       required: true
       schema:
         type: string
+    PostSort:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [newest, oldest]
+        default: newest
+      description: Sort posts by createdAt (newest=DESC, oldest=ASC). Default keeps current behavior.
+    CommentSort:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [newest, oldest]
+        default: oldest
+      description: Sort comments by createdAt (newest=DESC, oldest=ASC). Default keeps current behavior.
     Limit:
       name: limit
       in: query

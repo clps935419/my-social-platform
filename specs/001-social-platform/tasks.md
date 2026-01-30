@@ -188,14 +188,39 @@ description: "Task list for feature implementation"
 
 **Goal**：登入者可新增留言；訪客可看留言列表；貼文軟刪除後留言列表/新增留言一律 404。
 
+**Scope Note**：留言列表 `GET /api/posts/{postId}/comments` 已在 US1 實作；US4 主要新增留言（POST），並補強「貼文軟刪除後 GET/POST comments 一律 404」的一致性。Phase 6 以功能為主；完整 XSS hardening 見 Phase 7（T060）。
+
 **Independent Test**：對未刪除貼文新增留言成功；刪除貼文後，再 GET/POST comments 皆 404。
 
 ### Implementation
 
 - [ ] T055 [US4] 新增建立留言 SP（若貼文 deleted 則 404；回 Comment）於 `DB/210_sp_comment.sql`
+	- SP 名稱：`sp_comment_create`
+	- Params（named）：`p_actor_user_id (uuid)`, `p_post_id (uuid)`, `p_content (text)`
+	- 規則：
+		- `p_content` 必填且不得全空白（content 長度/其他限制以 OpenAPI 為準）
+		- `p_post_id` 不存在或貼文已軟刪除（`deleted_at IS NOT NULL`）→ not found（對外一律 404）
+		- 後端 404/驗證判斷來源必須由 SP 處理（禁止為了判斷狀態而額外查 posts 表）
+	- Return（1 row）：回傳 `Comment`（欄位以 OpenAPI schema 為準；時間為 UTC ISO 8601 含 `Z`）
+
 - [ ] T056 [US4] 實作 POST /posts/{postId}/comments（需登入；deleted post → 404）於 `backend/src/main/java/com/example/platform/api/CommentController.java`
+	- 成功：回 201 + `Comment`（response 以 OpenAPI 為準）
+	- 未登入：回 401
+	- `postId` 不存在或貼文已軟刪除：回 404（判斷依 `sp_comment_create`；禁止自行 SQL 查表）
+	- 輸入驗證：`content` 必填且不得全空白
+
 - [ ] T057 [P] [US4] 建立前端新增留言 UI（登入可輸入送出；成功後刷新列表）於 `frontend/src/components/CreateCommentForm.vue`
-- [ ] T058 [US4] 建立 US4 可重跑驗收腳本（含：未登入 401、deleted post 404）於 `docs/us4-acceptance.http`
+	- XSS 最小規則：留言內容一律以純文字顯示（禁止使用 `v-html`）；使用 Vue 預設插值輸出即可。完整 XSS hardening 見 Phase 7（T060）。
+
+- [ ] T058 [US4] 建立 US4 可重跑驗收腳本（含成功案例；未登入 401、deleted post 404）於 `docs/us4-acceptance.http`
+	- 成功案例：對未刪除貼文 POST comment 成功（201），再 GET comments 能看到新增留言
+	- 失敗案例：未登入 POST → 401；貼文軟刪除後 GET/POST comments → 404
+
+- [ ] T067 [P] [US4] 新增列表排序 query 參數（支援 newest/oldest；不破壞現有預設排序）並同步更新契約/文件
+	- 影響 endpoints：`GET /api/posts`、`GET /api/posts/{postId}/comments`
+	- 契約：以 `specs/001-social-platform/contracts/openapi.yaml` 已定義的 `sort` query（newest/oldest + default）為準
+	- DB/Backend：`DB/200_sp_post.sql`、`DB/210_sp_comment.sql` 與對應 Controller/Validator/DAO 需支援該 query（SP-first；不得自行 SQL 拼接）
+	- 文件：補齊 `docs/us1-acceptance.http` 的 sort 範例與 400 範例
 
 **Checkpoint**：US4 腳本可重跑且通過。
 
@@ -203,10 +228,27 @@ description: "Task list for feature implementation"
 
 ## Phase 7: Polish & Cross-Cutting Concerns（跨故事收尾）
 
-- [ ] T059 強化 OpenAPI 契約一致性（比對 `contracts/openapi.yaml` 與實作；補齊缺漏的 schema/response）於 `specs/001-social-platform/contracts/openapi.yaml`
+**Scope Note**：Phase 7 以「一致性檢查 + 最小重構/修補」為主，避免在沒有需求的地方引入大型改動（例如：引入 HTML sanitizer 或大幅改 response schema）。
+
+
+- [ ] T059 強化 OpenAPI 契約一致性（比對契約與實作；以契約為準修正實作；必要時才補齊契約）
+	- Source of truth：以 `specs/001-social-platform/contracts/openapi.yaml` 為準；若實作不符，優先調整實作；只有在需求確定要改或契約缺漏時才更新契約。
+	- 檢查重點：status code（201/204/404/401/403/429）、error response schema（ErrorResponse）、security（bearerAuth 標示）、時間格式（UTC ISO 8601 含 `Z`）。
+	- 若需更新契約：只補齊「已實作且確定正確」的 schema/response，不新增未規劃的 endpoints。
+
 - [ ] T060 強化安全：確保所有輸入輸出不會造成 XSS（前端禁止 v-html；必要時做輸出編碼）於 `frontend/src/components/PostContent.vue`
+	- 若 `PostContent.vue` 不存在：新增此 component，統一用純文字渲染貼文/留言內容（禁止 `v-html`）。
+	- 套用範圍：貼文列表、貼文詳情、留言列表、以及任何顯示 user-provided content 的地方。
+	- 原則：優先使用 Vue 預設插值（auto-escape）；除非明確需求，否則不引入 HTML sanitizer。
+
 - [ ] T061 確認後端不洩漏 stack trace/SQL（包含 DataAccessException/Unhandled exception）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
+	- 「不洩漏」定義：API response body 不得包含 SQL 字串、driver 訊息、stack trace、package/class/method 詳細資訊。
+	- 允許：server-side logging（用標準 logger）；避免直接 `printStackTrace()`。
+	- 驗收：故意觸發 DB error / 未處理例外時，回應仍為標準 `ErrorResponse{errorCode,message}` 且 message 為一般化內容。
+
 - [ ] T062 Quickstart 驗證與更新（確保路徑/指令與實際一致）於 `specs/001-social-platform/quickstart.md`
+	- 檢查項：`docker compose up -d --build`、`http://localhost/`、`/api/swagger-ui/index.html`、`/api/health`、以及 docs/*.http 驗收腳本路徑。
+	- 若專案實際採用 `Makefile` 指令：同步把對應指令（如 `make up/build/down`）寫進 quickstart。
 
 ---
 
