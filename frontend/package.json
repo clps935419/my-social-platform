@@ -13,17 +13,21 @@
   },
   "biomeImportExample": "import { ElButton } from 'element-plus'; import { Edit } from '@element-plus/icons-vue';",
   "dependencies": {
-    "vue": "^3.4.15",
-    "vue-router": "^4.2.5",
+    "@element-plus/icons-vue": "2.3.1",
+    "@hey-api/client-axios": "^0.9.1",
     "@tanstack/vue-query": "^5.17.19",
     "axios": "^1.6.5",
     "element-plus": "2.5.6",
-    "@element-plus/icons-vue": "2.3.1"
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.3",
-    "vite": "^5.0.11",
     "@biomejs/biome": "^1.9.4",
-    "@hey-api/openapi-ts": "0.64.0"
+    "@hey-api/openapi-ts": "0.64.0",
+    "@types/node": "^25.1.0",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "typescript": "^5.9.3",
+    "vite": "^5.0.11",
+    "vue-tsc": "^3.2.4"
   }
 }
