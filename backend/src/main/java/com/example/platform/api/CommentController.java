@@ -24,8 +24,8 @@ import java.util.UUID;
 
 /**
  * REST controller for comment operations
- * US1: GET /posts/{postId}/comments - List comments (public, no auth required)
- * US4: POST /posts/{postId}/comments - Create comment (requires auth)
+ * GET /posts/{postId}/comments - List comments (public, no auth required)
+ * POST /posts/{postId}/comments - Create comment (requires auth)
  */
 @RestController
 @RequestMapping("/posts/{postId}/comments")
@@ -117,14 +117,8 @@ public class CommentController {
             throw new UnauthorizedException("Authentication required");
         }
         
-        // Validate content is not empty or just whitespace
-        String content = request.getContent();
-        if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Content is required and cannot be empty");
-        }
-        
         // Call DAO
-        Map<String, Object> result = commentDao.createComment(userId, postUuid, content);
+        Map<String, Object> result = commentDao.createComment(userId, postUuid, request.getContent());
         
         Boolean postExists = (Boolean) result.get("postExists");
         Boolean postDeleted = (Boolean) result.get("postDeleted");

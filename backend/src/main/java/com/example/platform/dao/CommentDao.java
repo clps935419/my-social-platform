@@ -17,7 +17,7 @@ import java.util.UUID;
 
 /**
  * Data access object for comments
- * Uses stored procedure sp_comment_list_by_post
+ * Uses stored procedures: sp_comment_list_by_post, sp_comment_create
  */
 @Repository
 public class CommentDao extends StoredProcedureExecutor {
