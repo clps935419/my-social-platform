@@ -101,23 +101,23 @@ description: "Task list for feature implementation"
 
 ### Implementation（DB SP → Backend Auth → Frontend 表單 → 驗收腳本）
 
-- [ ] T030 [US2] 新增使用者註冊 SP（phone_e164 unique；回 UserProfile）於 `DB/100_sp_user.sql`
-- [ ] T031 [US2] 新增使用者查詢 SP（登入用：查 hash/salt；phone normalize 後查）於 `DB/100_sp_user.sql`
-- [ ] T032 [US2] 新增個人資料 SP（/me）於 `DB/100_sp_user.sql`
-- [ ] T033 [US2] 新增 refresh token 簽發/驗證/撤銷/rotation SP（原子性更新舊 token + 插入新 token）於 `DB/110_sp_refresh_token.sql`
-- [ ] T034 [P] [US2] 實作密碼 salt+hash（建議 PBKDF2 或 BCrypt；提供 verify）於 `backend/src/main/java/com/example/platform/security/PasswordHasher.java`
-- [ ] T035 [P] [US2] 實作 JWT service（issue/verify；expiresInSeconds；UTC time）於 `backend/src/main/java/com/example/platform/security/JwtService.java`
-- [ ] T036 [P] [US2] 實作 refresh token 產生/雜湊/比對（DB 只存 token_hash）於 `backend/src/main/java/com/example/platform/security/RefreshTokenService.java`
-- [ ] T037 [US2] 實作 auth middleware（解析 Authorization: Bearer；建立 principal；未登入回 401）於 `backend/src/main/java/com/example/platform/security/JwtAuthFilter.java`
-- [ ] T066 [P] [US2] 補齊 Swagger/OpenAPI BearerAuth 設定（Swagger UI 右上角 Authorize 可輸入 JWT；/me 與其他受保護 API 顯示鎖頭；Try it out 會帶 Authorization: Bearer <token>）於 `backend/src/main/java/com/example/platform/config/OpenApiConfig.java`
-- [ ] T038 [US2] 實作最小 rate limit（login/register；超限 429；訊息一般化）於 `backend/src/main/java/com/example/platform/security/RateLimitFilter.java`
-- [ ] T039 [US2] 實作 POST /auth/register（E.164 normalize；coverImage URL<=2048；409/400/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
-- [ ] T040 [US2] 實作 POST /auth/login（回 accessToken+refreshToken+user；401/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
-- [ ] T041 [US2] 實作 POST /auth/refresh（rotation：舊 refresh 立刻失效；401）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
-- [ ] T042 [US2] 實作 GET /me（需登入；回 UserProfile）於 `backend/src/main/java/com/example/platform/api/MeController.java`
+- [x] T030 [US2] 新增使用者註冊 SP（phone_e164 unique；回 UserProfile）於 `DB/100_sp_user.sql`
+- [x] T031 [US2] 新增使用者查詢 SP（登入用：查 hash/salt；phone normalize 後查）於 `DB/100_sp_user.sql`
+- [x] T032 [US2] 新增個人資料 SP（/me）於 `DB/100_sp_user.sql`
+- [x] T033 [US2] 新增 refresh token 簽發/驗證/撤銷/rotation SP（原子性更新舊 token + 插入新 token）於 `DB/110_sp_refresh_token.sql`
+- [x] T034 [P] [US2] 實作密碼 salt+hash（建議 PBKDF2 或 BCrypt；提供 verify）於 `backend/src/main/java/com/example/platform/security/PasswordHasher.java`
+- [x] T035 [P] [US2] 實作 JWT service（issue/verify；expiresInSeconds；UTC time）於 `backend/src/main/java/com/example/platform/security/JwtService.java`
+- [x] T036 [P] [US2] 實作 refresh token 產生/雜湊/比對（DB 只存 token_hash）於 `backend/src/main/java/com/example/platform/security/RefreshTokenService.java`
+- [x] T037 [US2] 實作 auth middleware（解析 Authorization: Bearer；建立 principal；未登入回 401）於 `backend/src/main/java/com/example/platform/security/JwtAuthFilter.java`
+- [x] T066 [P] [US2] 補齊 Swagger/OpenAPI BearerAuth 設定（Swagger UI 右上角 Authorize 可輸入 JWT；/me 與其他受保護 API 顯示鎖頭；Try it out 會帶 Authorization: Bearer <token>）於 `backend/src/main/java/com/example/platform/config/OpenApiConfig.java`
+- [x] T038 [US2] 實作最小 rate limit（login/register；超限 429；訊息一般化）於 `backend/src/main/java/com/example/platform/security/RateLimitFilter.java`
+- [x] T039 [US2] 實作 POST /auth/register（E.164 normalize；coverImage URL<=2048；409/400/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
+- [x] T040 [US2] 實作 POST /auth/login（回 accessToken+refreshToken+user；401/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
+- [x] T041 [US2] 實作 POST /auth/refresh（rotation：舊 refresh 立刻失效；401）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
+- [x] T042 [US2] 實作 GET /me（需登入；回 UserProfile）於 `backend/src/main/java/com/example/platform/api/MeController.java`
 - [ ] T043 [P] [US2] 建立前端註冊/登入頁（呼叫 /api/auth/register,/api/auth/login；保存 token）於 `frontend/src/pages/AuthPage.vue`
 - [ ] T044 [US2] 建立前端 token 儲存與自動 refresh（最小：401 時觸發 refresh 再重試一次）於 `frontend/src/api/auth.ts`
-- [ ] T045 [US2] 建立 US2 可重跑驗收腳本（含：重複註冊 409、錯誤密碼 401、refresh 舊 token 失效）於 `docs/us2-acceptance.http`
+- [x] T045 [US2] 建立 US2 可重跑驗收腳本（含：重複註冊 409、錯誤密碼 401、refresh 舊 token 失效）於 `docs/us2-acceptance.http`
 
 **Checkpoint**：US2 腳本可重跑且通過；對外錯誤不含 stack/SQL。
 
