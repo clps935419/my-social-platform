@@ -37,7 +37,7 @@ description: "Task list for feature implementation"
 - [X] T005 [P] 先建立 Biome 規則檔（biome.json）；工具安裝與 npm scripts（format/lint）待 T007 前端骨架完成後補齊
 - [X] T006 [P] 建立後端 Spring Boot 專案骨架（Maven + Web/JDBC/Validation + springdoc-openapi）於 `backend/pom.xml`
 - [X] T007 [P] 建立前端 Vue 3 + Vite 專案骨架（含 dev/build scripts）於 `frontend/package.json`
-- [x] T074 [P] 建立前端 TypeScript 開發設定（Vite + TS；`@` 路徑別名；`.vue` 型別宣告）於 `frontend/tsconfig.json`, `frontend/tsconfig.node.json`, `frontend/vite.config.ts`, `frontend/src/env.d.ts`
+- [X] T074 [P] 建立前端 TypeScript 開發設定（Vite + TS；`@` 路徑別名；`.vue` 型別宣告）於 `frontend/tsconfig.json`, `frontend/tsconfig.node.json`, `frontend/vite.config.ts`, `frontend/src/env.d.ts`
 - [X] T008 建立環境變數樣板（DB/app secrets）於 `.env.example`
 - [X] T063 建立 Makefile 指令（build/up/down/logs/ps/clean 等；統一呼叫 docker compose）於 `Makefile`
 
