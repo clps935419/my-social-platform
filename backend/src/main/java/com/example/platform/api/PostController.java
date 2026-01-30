@@ -92,7 +92,7 @@ public class PostController {
     @Operation(
         summary = "Create post",
         description = "Create a new post. Requires authentication.",
-        security = @SecurityRequirement(name = "BearerAuth"),
+        security = @SecurityRequirement(name = "bearerAuth"),
         responses = {
             @ApiResponse(responseCode = "201", description = "Post created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
@@ -138,7 +138,7 @@ public class PostController {
     @Operation(
         summary = "Update post",
         description = "Update a post. Only the author can update their post.",
-        security = @SecurityRequirement(name = "BearerAuth"),
+        security = @SecurityRequirement(name = "bearerAuth"),
         responses = {
             @ApiResponse(responseCode = "200", description = "Post updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
@@ -202,7 +202,7 @@ public class PostController {
     @Operation(
         summary = "Delete post",
         description = "Soft delete a post. Only the author can delete their post.",
-        security = @SecurityRequirement(name = "BearerAuth"),
+        security = @SecurityRequirement(name = "bearerAuth"),
         responses = {
             @ApiResponse(responseCode = "204", description = "Post deleted successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token"),

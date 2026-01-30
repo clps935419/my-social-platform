@@ -32,7 +32,7 @@ public class MeController {
     @Operation(
             summary = "Get current user profile",
             description = "Get profile information for the authenticated user",
-            security = @SecurityRequirement(name = "BearerAuth"),
+            security = @SecurityRequirement(name = "bearerAuth"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Profile retrieved successfully"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token")

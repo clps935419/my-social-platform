@@ -92,7 +92,7 @@ public class CommentController {
     @Operation(
         summary = "Create comment",
         description = "Create a new comment on a post. Requires authentication. Returns 404 if post doesn't exist or is deleted.",
-        security = @SecurityRequirement(name = "BearerAuth"),
+        security = @SecurityRequirement(name = "bearerAuth"),
         responses = {
             @ApiResponse(responseCode = "201", description = "Comment created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
