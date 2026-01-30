@@ -231,7 +231,7 @@ description: "Task list for feature implementation"
 **Scope Note**：Phase 7 以「一致性檢查 + 最小重構/修補」為主，避免在沒有需求的地方引入大型改動（例如：引入 HTML sanitizer 或大幅改 response schema）。
 
 
-- [ ] T059 強化 OpenAPI 契約一致性（比對契約與實作；以契約為準修正實作；必要時才補齊契約）
+- [x] T059 強化 OpenAPI 契約一致性（比對契約與實作；以契約為準修正實作；必要時才補齊契約）
 	- Source of truth：以 `specs/001-social-platform/contracts/openapi.yaml` 為準；若實作不符，優先調整實作；只有在需求確定要改或契約缺漏時才更新契約。
 	- 檢查重點：status code（201/204/404/401/403/429）、error response schema（ErrorResponse）、security（bearerAuth 標示）、時間格式（UTC ISO 8601 含 `Z`）。
 	- 若需更新契約：只補齊「已實作且確定正確」的 schema/response，不新增未規劃的 endpoints。
@@ -241,12 +241,12 @@ description: "Task list for feature implementation"
 	- 套用範圍：貼文列表、貼文詳情、留言列表、以及任何顯示 user-provided content 的地方。
 	- 原則：優先使用 Vue 預設插值（auto-escape）；除非明確需求，否則不引入 HTML sanitizer。
 
-- [ ] T061 確認後端不洩漏 stack trace/SQL（包含 DataAccessException/Unhandled exception）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
+- [x] T061 確認後端不洩漏 stack trace/SQL（包含 DataAccessException/Unhandled exception）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
 	- 「不洩漏」定義：API response body 不得包含 SQL 字串、driver 訊息、stack trace、package/class/method 詳細資訊。
 	- 允許：server-side logging（用標準 logger）；避免直接 `printStackTrace()`。
 	- 驗收：故意觸發 DB error / 未處理例外時，回應仍為標準 `ErrorResponse{errorCode,message}` 且 message 為一般化內容。
 
-- [ ] T062 Quickstart 驗證與更新（確保路徑/指令與實際一致）於 `specs/001-social-platform/quickstart.md`
+- [x] T062 Quickstart 驗證與更新（確保路徑/指令與實際一致）於 `specs/001-social-platform/quickstart.md`
 	- 檢查項：`docker compose up -d --build`、`http://localhost/`、`/api/swagger-ui/index.html`、`/api/health`、以及 docs/*.http 驗收腳本路徑。
 	- 若專案實際採用 `Makefile` 指令：同步把對應指令（如 `make up/build/down`）寫進 quickstart。
 
