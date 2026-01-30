@@ -1,5 +1,7 @@
 package com.example.platform.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     
     /**
      * Validation errors (400)
@@ -103,8 +107,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException ex) {
-        // Log the full exception for debugging
-        ex.printStackTrace();
+        // Log the full exception for debugging (server-side only)
+        logger.error("Database error occurred", ex);
         
         // Return generic error to client (do not leak SQL)
         ErrorResponse error = new ErrorResponse(
@@ -120,8 +124,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        // Log the full exception for debugging
-        ex.printStackTrace();
+        // Log the full exception for debugging (server-side only)
+        logger.error("Unexpected error occurred", ex);
         
         // Return generic error to client (do not leak stack trace)
         ErrorResponse error = new ErrorResponse(
