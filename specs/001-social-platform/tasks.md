@@ -109,6 +109,7 @@ description: "Task list for feature implementation"
 - [ ] T035 [P] [US2] 實作 JWT service（issue/verify；expiresInSeconds；UTC time）於 `backend/src/main/java/com/example/platform/security/JwtService.java`
 - [ ] T036 [P] [US2] 實作 refresh token 產生/雜湊/比對（DB 只存 token_hash）於 `backend/src/main/java/com/example/platform/security/RefreshTokenService.java`
 - [ ] T037 [US2] 實作 auth middleware（解析 Authorization: Bearer；建立 principal；未登入回 401）於 `backend/src/main/java/com/example/platform/security/JwtAuthFilter.java`
+- [ ] T066 [P] [US2] 補齊 Swagger/OpenAPI BearerAuth 設定（Swagger UI 右上角 Authorize 可輸入 JWT；/me 與其他受保護 API 顯示鎖頭；Try it out 會帶 Authorization: Bearer <token>）於 `backend/src/main/java/com/example/platform/config/OpenApiConfig.java`
 - [ ] T038 [US2] 實作最小 rate limit（login/register；超限 429；訊息一般化）於 `backend/src/main/java/com/example/platform/security/RateLimitFilter.java`
 - [ ] T039 [US2] 實作 POST /auth/register（E.164 normalize；coverImage URL<=2048；409/400/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
 - [ ] T040 [US2] 實作 POST /auth/login（回 accessToken+refreshToken+user；401/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
