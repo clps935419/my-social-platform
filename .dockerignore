@@ -1,0 +1,35 @@
+# Git
+.git/
+.gitignore
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build artifacts
+backend/target/
+frontend/dist/
+*.jar
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation (keep in image but not in build context unnecessarily)
+doc/
+docs/
+specs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/

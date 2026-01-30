@@ -1,0 +1,258 @@
+# Social Media Platform
+
+A simple social media platform with phone number authentication, posts, and comments. Built with Spring Boot, Vue 3, and PostgreSQL.
+
+## 🏗️ Architecture
+
+- **Frontend**: Vue 3 + Vite + TanStack Query
+- **Backend**: Spring Boot 3 (Java 17) + JdbcTemplate + Stored Procedures
+- **Database**: PostgreSQL 16
+- **Web Server**: Nginx (reverse proxy + static files)
+- **Deployment**: Docker Compose
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Docker & Docker Compose
+- (Optional) Node.js 20+ for local frontend development
+- (Optional) Java 17+ & Maven for local backend development
+
+### 1. Start All Services
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Start services (this will take a few minutes on first run)
+make up
+
+# Or use docker compose directly
+docker compose up -d --build
+```
+
+### 2. Check Service Health
+
+```bash
+make health
+```
+
+### 3. Access the Application
+
+- **Frontend**: http://localhost/
+- **Backend API**: http://localhost/api/health
+- **Swagger UI**: http://localhost/api/swagger-ui/index.html
+- **Database**: localhost:5432
+
+## 🛠️ Development
+
+### Make Commands
+
+```bash
+make help        # Show all available commands
+make up          # Start all services
+make down        # Stop all services
+make restart     # Restart all services
+make logs        # Show logs (follow mode)
+make ps          # Show service status
+make clean       # Stop and remove everything
+make health      # Check service health
+```
+
+### Local Development
+
+#### Frontend
+```bash
+cd frontend
+npm install
+npm run dev      # Dev server on http://localhost:5173
+npm run build    # Build for production
+```
+
+#### Backend
+```bash
+cd backend
+mvn spring-boot:run  # Requires Java 17+
+```
+
+### Hot Reload
+
+Both frontend and backend support hot reload in Docker:
+- **Frontend**: Changes to `frontend/src/` trigger rebuild
+- **Backend**: Changes to `backend/src/` trigger auto-restart (via spring-boot-devtools)
+
+## 📁 Project Structure
+
+```
+├── DB/                  # Database initialization scripts
+│   ├── 001_schema.sql   # Schema and extensions
+│   ├── 010_tables.sql   # Core tables
+│   ├── 020_indexes.sql  # Indexes and constraints
+│   └── 030_seed.sql     # Seed data
+├── backend/             # Spring Boot application
+│   ├── src/main/java/
+│   │   └── com/example/platform/
+│   │       ├── api/              # REST controllers
+│   │       ├── service/          # Business logic
+│   │       ├── dao/              # Data access (SP calls)
+│   │       ├── security/         # Auth & JWT
+│   │       └── common/           # Error handling
+│   └── pom.xml
+├── frontend/            # Vue 3 application
+│   ├── src/
+│   │   ├── pages/      # Vue pages
+│   │   ├── components/ # Vue components
+│   │   └── api/        # API client
+│   └── package.json
+├── nginx/              # Nginx configuration
+│   └── default.conf
+└── docker-compose.yml
+```
+
+## 🔒 Security Features
+
+- **SP-First Architecture**: All database access via stored procedures (no SQL injection)
+- **Parameterized Queries**: Only SimpleJdbcCall with named parameters
+- **No Stack Traces**: Error responses never leak internal details
+- **E.164 Phone Validation**: Consistent phone number format
+- **JWT Authentication**: Stateless access tokens + refresh token rotation
+- **Password Hashing**: Salt + hash (PBKDF2/BCrypt)
+- **Rate Limiting**: Protection against brute force attacks
+- **XSS Prevention**: No unsafe rendering in frontend
+
+## 📋 Features (Roadmap)
+
+### ✅ Phase 1 & 2: Foundation (Completed)
+- [x] Project setup with Docker Compose
+- [x] Database schema with stored procedures
+- [x] Backend error handling framework
+- [x] Frontend API client with TanStack Query
+- [x] Health check endpoint
+
+### 🚧 Phase 3: User Story 1 - Browse Posts (Next)
+- [ ] List posts (newest first)
+- [ ] View post comments
+- [ ] Pagination support
+
+### 📅 Phase 4: User Story 2 - Authentication
+- [ ] Phone number registration
+- [ ] Login with JWT
+- [ ] Refresh token rotation
+- [ ] Get user profile
+
+### 📅 Phase 5: User Story 3 - Post Management
+- [ ] Create post
+- [ ] Update post (author only)
+- [ ] Soft delete post (author only)
+
+### 📅 Phase 6: User Story 4 - Comments
+- [ ] Add comment to post
+- [ ] View comments (all users)
+
+## 🧪 Testing
+
+### API Testing
+
+Use the provided acceptance scripts:
+```bash
+# Coming in Phase 3
+./docs/us1-acceptance.http
+```
+
+Or use curl:
+```bash
+# Health check
+curl http://localhost/api/health
+
+# List posts (after US1 implementation)
+curl http://localhost/api/posts?limit=10&offset=0
+```
+
+### Database Testing
+
+Connect to PostgreSQL:
+```bash
+docker compose exec db psql -U postgres -d social_platform
+```
+
+## 📝 Implementation Status
+
+See [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) for detailed progress.
+
+**Completed Tasks**: 20/20 (Phase 1 & 2)
+- Phase 1 (Setup): 9/9 ✅
+- Phase 2 (Foundation): 11/11 ✅
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Edit `.env` to customize:
+```bash
+# Database
+POSTGRES_DB=social_platform
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5432
+
+# JWT
+JWT_SECRET=your-secret-here-min-32-chars
+JWT_EXPIRATION_SECONDS=3600
+
+# Refresh Token
+REFRESH_TOKEN_EXPIRATION_SECONDS=2592000
+
+# Nginx
+NGINX_PORT=80
+```
+
+## 📚 Documentation
+
+- [Implementation Summary](./IMPLEMENTATION_SUMMARY.md) - Detailed implementation report
+- [Specification](./specs/001-social-platform/spec.md) - Feature requirements
+- [Technical Plan](./specs/001-social-platform/plan.md) - Architecture decisions
+- [Data Model](./specs/001-social-platform/data-model.md) - Database schema
+- [API Contract](./specs/001-social-platform/contracts/openapi.yaml) - OpenAPI spec
+
+## 🐛 Troubleshooting
+
+### Services won't start
+```bash
+# Check logs
+make logs
+
+# Check status
+make ps
+
+# Clean restart
+make clean
+make up
+```
+
+### Database connection issues
+```bash
+# Wait for database to be ready
+docker compose exec db pg_isready -U postgres
+
+# Check database logs
+docker compose logs db
+```
+
+### Port conflicts
+```bash
+# Change ports in .env
+POSTGRES_PORT=5433
+NGINX_PORT=8000
+```
+
+## 📄 License
+
+This is a demo project for educational purposes.
+
+## 🤝 Contributing
+
+This is a reference implementation. Feel free to use it as a starting point for your own projects.
+
+## 📧 Contact
+
+For questions or feedback, please refer to the project documentation in the `specs/` directory.

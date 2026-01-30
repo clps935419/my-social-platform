@@ -30,15 +30,15 @@ description: "Task list for feature implementation"
 
 ## Phase 1: Setup（專案初始化 / 目錄與一鍵啟動骨架）
 
-- [ ] T001 建立目錄結構（DB/、backend/、frontend/、nginx/）於 `DB/README.md`
-- [ ] T002 建立 Docker Compose 骨架（nginx/app/db + networks/volumes + env；後端需可「只用 Docker」啟動，不依賴本機 Java）於 `docker-compose.yml`
-- [ ] T003 [P] 建立 Nginx 站台設定（靜態站 + `/api/*` 反代；保留 `/api` base path 不做 rewrite；確保 `/api/swagger-ui/index.html` 可用）於 `nginx/default.conf`
-- [ ] T004 [P] 建立 DB init 掛載與腳本順序（docker-entrypoint-initdb.d）於 `docker-compose.yml`
-- [ ] T005 [P] 先建立 Biome 規則檔（biome.json）；工具安裝與 npm scripts（format/lint）待 T007 前端骨架完成後補齊
-- [ ] T006 [P] 建立後端 Spring Boot 專案骨架（Maven + Web/JDBC/Validation + springdoc-openapi）於 `backend/pom.xml`
-- [ ] T007 [P] 建立前端 Vue 3 + Vite 專案骨架（含 dev/build scripts）於 `frontend/package.json`
-- [ ] T008 建立環境變數樣板（DB/app secrets）於 `.env.example`
-- [ ] T063 建立 Makefile 指令（build/up/down/logs/ps/clean 等；統一呼叫 docker compose）於 `Makefile`
+- [X] T001 建立目錄結構（DB/、backend/、frontend/、nginx/）於 `DB/README.md`
+- [X] T002 建立 Docker Compose 骨架（nginx/app/db + networks/volumes + env；後端需可「只用 Docker」啟動，不依賴本機 Java）於 `docker-compose.yml`
+- [X] T003 [P] 建立 Nginx 站台設定（靜態站 + `/api/*` 反代；保留 `/api` base path 不做 rewrite；確保 `/api/swagger-ui/index.html` 可用）於 `nginx/default.conf`
+- [X] T004 [P] 建立 DB init 掛載與腳本順序（docker-entrypoint-initdb.d）於 `docker-compose.yml`
+- [X] T005 [P] 先建立 Biome 規則檔（biome.json）；工具安裝與 npm scripts（format/lint）待 T007 前端骨架完成後補齊
+- [X] T006 [P] 建立後端 Spring Boot 專案骨架（Maven + Web/JDBC/Validation + springdoc-openapi）於 `backend/pom.xml`
+- [X] T007 [P] 建立前端 Vue 3 + Vite 專案骨架（含 dev/build scripts）於 `frontend/package.json`
+- [X] T008 建立環境變數樣板（DB/app secrets）於 `.env.example`
+- [X] T063 建立 Makefile 指令（build/up/down/logs/ps/clean 等；統一呼叫 docker compose）於 `Makefile`
 
 ---
 
@@ -46,26 +46,26 @@ description: "Task list for feature implementation"
 
 ### Database（Schema/Indexes；SP 會分散到各 User Story）
 
-- [ ] T009 建立 DB schema/extension 基礎（UTC/timestamptz 使用）於 `DB/001_schema.sql`
-- [ ] T010 建立核心資料表（users/posts/comments/refresh_tokens）於 `DB/010_tables.sql`
-- [ ] T011 建立索引與唯一約束（phone_e164 unique、token_hash unique、comments(post_id,created_at) 等）於 `DB/020_indexes.sql`
-- [ ] T012 建立最小 seed（供 US1 可獨立驗收：至少 1 user/2 posts/多 comments）於 `DB/030_seed.sql`
+- [X] T009 建立 DB schema/extension 基礎（UTC/timestamptz 使用）於 `DB/001_schema.sql`
+- [X] T010 建立核心資料表（users/posts/comments/refresh_tokens）於 `DB/010_tables.sql`
+- [X] T011 建立索引與唯一約束（phone_e164 unique、token_hash unique、comments(post_id,created_at) 等）於 `DB/020_indexes.sql`
+- [X] T012 建立最小 seed（供 US1 可獨立驗收：至少 1 user/2 posts/多 comments）於 `DB/030_seed.sql`
 
 ### Backend（共用框架：錯誤/驗證/DAO/SP 呼叫/Swagger）
 
-- [ ] T013 建立後端設定（datasource 走 env；關閉 stack trace/whitelabel）於 `backend/src/main/resources/application.yml`
-- [ ] T014 實作統一錯誤回應（Error{errorCode,message}）與例外映射於 `backend/src/main/java/com/example/platform/common/ErrorResponse.java`
-- [ ] T015 實作全域例外處理（Validation/BadRequest/Unauthorized/Forbidden/NotFound/Conflict/TooManyRequests；不洩漏 SQL/stack）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
-- [ ] T016 建立 Stored Procedure 呼叫基礎封裝（SimpleJdbcCall + named params；禁止 SQL 拼接）於 `backend/src/main/java/com/example/platform/dao/StoredProcedureExecutor.java`
-- [ ] T017 建立 controller 層共用輸入驗證（limit/offset default/max、URL 長度、E.164 normalize helper 介面）於 `backend/src/main/java/com/example/platform/api/validation/RequestValidators.java`
-- [ ] T018 設定 Swagger/OpenAPI 對外固定路徑可用（後端 base path 固定為 `/api`；springdoc 路徑採預設並可經 nginx 對外存取 `/api/swagger-ui/index.html`）於 `backend/src/main/resources/application.yml`
-- [ ] T064 建立後端容器 dev 啟動/熱更新機制（不需本機 Java；以「容器內 Maven 執行 + spring-boot-devtools + source volume mount」為準；修改程式碼可自動重新編譯並重啟）於 `docker-compose.yml`
-- [ ] T065 建立 Health API（不需 DB、無副作用；用於驗證後端確實在跑；回應含 status 與 UTC time）於 `backend/src/main/java/com/example/platform/api/HealthController.java`
+- [X] T013 建立後端設定（datasource 走 env；關閉 stack trace/whitelabel）於 `backend/src/main/resources/application.yml`
+- [X] T014 實作統一錯誤回應（Error{errorCode,message}）與例外映射於 `backend/src/main/java/com/example/platform/common/ErrorResponse.java`
+- [X] T015 實作全域例外處理（Validation/BadRequest/Unauthorized/Forbidden/NotFound/Conflict/TooManyRequests；不洩漏 SQL/stack）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
+- [X] T016 建立 Stored Procedure 呼叫基礎封裝（SimpleJdbcCall + named params；禁止 SQL 拼接）於 `backend/src/main/java/com/example/platform/dao/StoredProcedureExecutor.java`
+- [X] T017 建立 controller 層共用輸入驗證（limit/offset default/max、URL 長度、E.164 normalize helper 介面）於 `backend/src/main/java/com/example/platform/api/validation/RequestValidators.java`
+- [X] T018 設定 Swagger/OpenAPI 對外固定路徑可用（後端 base path 固定為 `/api`；springdoc 路徑採預設並可經 nginx 對外存取 `/api/swagger-ui/index.html`）於 `backend/src/main/resources/application.yml`
+- [X] T064 建立後端容器 dev 啟動/熱更新機制（不需本機 Java；以「容器內 Maven 執行 + spring-boot-devtools + source volume mount」為準；修改程式碼可自動重新編譯並重啟）於 `docker-compose.yml`
+- [X] T065 建立 Health API（不需 DB、無副作用；用於驗證後端確實在跑；回應含 status 與 UTC time）於 `backend/src/main/java/com/example/platform/api/HealthController.java`
 
 ### Frontend（共用框架：API client / Query client）
 
-- [ ] T019 建立 API client（baseURL=/api；統一錯誤處理；預留加 Authorization header）於 `frontend/src/api/http.ts`
-- [ ] T020 建立 TanStack Query client 與 Provider（QueryClient + error boundary 最小化）於 `frontend/src/main.ts`
+- [X] T019 建立 API client（baseURL=/api；統一錯誤處理；預留加 Authorization header）於 `frontend/src/api/http.ts`
+- [X] T020 建立 TanStack Query client 與 Provider（QueryClient + error boundary 最小化）於 `frontend/src/main.ts`
 
 **Checkpoint**：`docker compose up -d --build` 後可打開 `http://localhost/api/swagger-ui/index.html`（即使 endpoints 尚未全實作也需能進 Swagger UI）。
 
