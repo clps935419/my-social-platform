@@ -23,7 +23,7 @@ tests/
 General: Follow standard conventions
 
 ## Recent Changes
-
+請用中文進行交流
 
 
 <!-- MANUAL ADDITIONS START -->
