@@ -60,7 +60,7 @@ docker exec social-platform-db psql -U postgres -d social_platform -c "\dt"
 
 ### T005: Biome Configuration ✅
 **Status**: Complete  
-**Location**: `biome.json`  
+**Location**: `frontend/biome.json`  
 **Features**:
 - ✅ Formatter rules configured
 - ✅ Linter rules configured
@@ -434,11 +434,17 @@ curl http://localhost/api/health
 - `.env.example` - Environment template
 - `.gitignore` - Git exclusions
 - `.dockerignore` - Docker exclusions
-- `.eslintignore` - Linting exclusions
-- `biome.json` - Code formatting rules
 - `README.md` - Project documentation
-- `IMPLEMENTATION_SUMMARY.md` - Implementation details
 - `verify-phase1-phase2.sh` - Verification script
+
+**Frontend Configuration**:
+- `frontend/biome.json` - Code formatting rules
+- `frontend/.eslintignore` - Linting exclusions
+
+**Reports** (in `reports/` directory):
+- `IMPLEMENTATION_SUMMARY.md` - Implementation details
+- `PHASE1_PHASE2_STATUS.md` - Detailed status report
+- `DEPLOYMENT_INSTRUCTIONS.md` - Deployment guide
 
 ---
 

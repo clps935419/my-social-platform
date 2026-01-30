@@ -177,7 +177,7 @@ docker compose exec db psql -U postgres -d social_platform
 
 ## 📝 Implementation Status
 
-See [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) for detailed progress.
+See [IMPLEMENTATION_SUMMARY.md](./reports/IMPLEMENTATION_SUMMARY.md) for detailed progress.
 
 **Completed Tasks**: 20/20 (Phase 1 & 2)
 - Phase 1 (Setup): 9/9 ✅
@@ -208,7 +208,9 @@ NGINX_PORT=80
 
 ## 📚 Documentation
 
-- [Implementation Summary](./IMPLEMENTATION_SUMMARY.md) - Detailed implementation report
+- [Implementation Summary](./reports/IMPLEMENTATION_SUMMARY.md) - Detailed implementation report
+- [Deployment Instructions](./reports/DEPLOYMENT_INSTRUCTIONS.md) - Complete deployment guide
+- [Phase 1 & 2 Status](./reports/PHASE1_PHASE2_STATUS.md) - Detailed task completion status
 - [Specification](./specs/001-social-platform/spec.md) - Feature requirements
 - [Technical Plan](./specs/001-social-platform/plan.md) - Architecture decisions
 - [Data Model](./specs/001-social-platform/data-model.md) - Database schema
