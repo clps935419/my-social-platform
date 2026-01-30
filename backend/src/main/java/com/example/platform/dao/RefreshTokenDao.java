@@ -34,7 +34,7 @@ public class RefreshTokenDao {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_user_id", userId);
         params.put("p_token_hash", tokenHash);
-        params.put("p_expires_at", expiresAt);
+        params.put("p_expires_at", java.sql.Timestamp.from(expiresAt));
 
         return spExecutor.executeQuery("sp_refresh_token_issue", params, this::mapRefreshTokenRecord);
     }
@@ -61,7 +61,7 @@ public class RefreshTokenDao {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_old_token_hash", oldTokenHash);
         params.put("p_new_token_hash", newTokenHash);
-        params.put("p_new_expires_at", newExpiresAt);
+        params.put("p_new_expires_at", java.sql.Timestamp.from(newExpiresAt));
 
         try {
             return spExecutor.executeQuery("sp_refresh_token_rotate", params, this::mapRotatedToken);
