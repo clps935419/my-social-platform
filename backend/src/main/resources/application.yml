@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: social-platform
+  
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/social_platform}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+  
+  # Disable JPA/Hibernate (we use SP-first with JdbcTemplate)
+  jpa:
+    enabled: false
+  
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    # Disable default error page (whitelabel)
+    whitelabel:
+      enabled: false
+    # Do not include stack trace in error responses
+    include-stacktrace: never
+    include-message: always
+    include-binding-errors: always
+
+# SpringDoc OpenAPI / Swagger UI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+    enabled: true
+  show-actuator: false
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.example.platform: INFO
+    org.springframework.jdbc: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application-specific configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-in-production-min-32-chars}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+  refresh-token:
+    expiration-seconds: ${REFRESH_TOKEN_EXPIRATION_SECONDS:2592000}
+  rate-limit:
+    auth:
+      max-requests: 5
+      window-seconds: 60

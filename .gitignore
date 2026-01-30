@@ -1,0 +1,54 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+!frontend/dist/
+!frontend/dist/index.html
+build/
+*.jar
+target/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Database
+*.sql.bak
+*.db
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Docker
+.docker/
+
+# OS
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temp files
+*.tmp
+*.temp
