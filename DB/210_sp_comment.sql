@@ -67,6 +67,23 @@ BEGIN
     FROM comments
     WHERE comments.post_id = p_post_id;
     
+    -- If there are no comments, return a single row with metadata
+    IF v_total_count = 0 THEN
+        RETURN QUERY
+        SELECT 
+            NULL::UUID,
+            NULL::UUID,
+            NULL::UUID,
+            NULL::VARCHAR(100),
+            NULL::VARCHAR(2048),
+            NULL::TEXT,
+            NULL::TIMESTAMPTZ,
+            0::BIGINT,
+            TRUE,  -- post_exists
+            FALSE; -- post_deleted
+        RETURN;
+    END IF;
+    
     -- Return comments with author info, with dynamic ordering
     RETURN QUERY EXECUTE format('
         SELECT 
