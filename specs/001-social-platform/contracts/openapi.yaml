@@ -1,0 +1,367 @@
+openapi: 3.0.3
+info:
+  title: Simple Social Platform API
+  version: 1.0.0
+servers:
+  - url: /api
+paths:
+  /auth/register:
+    post:
+      summary: Register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/refresh:
+    post:
+      summary: Refresh access token (rotation)
+      description: Each refresh call rotates refreshToken; old refreshToken becomes invalid immediately.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /me:
+    get:
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /posts:
+    get:
+      summary: List posts
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostListResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+    post:
+      summary: Create post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /posts/{postId}:
+    patch:
+      summary: Update post (author only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      summary: Soft delete post (author only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '204':
+          description: No Content
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /posts/{postId}/comments:
+    get:
+      summary: List comments for a post
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentListResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      summary: Create comment for a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    PostId:
+      name: postId
+      in: path
+      required: true
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        errorCode: { type: string }
+        message: { type: string }
+      required: [errorCode, message]
+    RegisterRequest:
+      type: object
+      properties:
+        phoneNumber: { type: string }
+        userName: { type: string }
+        email: { type: string, nullable: true }
+        password: { type: string }
+        coverImage: { type: string, nullable: true }
+        biography: { type: string, nullable: true }
+      required: [phoneNumber, userName, password]
+    LoginRequest:
+      type: object
+      properties:
+        phoneNumber: { type: string }
+        password: { type: string }
+      required: [phoneNumber, password]
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken: { type: string }
+      required: [refreshToken]
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresInSeconds: { type: integer }
+      required: [accessToken, refreshToken, tokenType, expiresInSeconds]
+    UserProfile:
+      type: object
+      properties:
+        userId: { type: string }
+        phoneNumber: { type: string }
+        userName: { type: string }
+        email: { type: string, nullable: true }
+        coverImage: { type: string, nullable: true }
+        biography: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, nullable: true }
+      required: [userId, phoneNumber, userName, createdAt]
+    LoginResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresInSeconds: { type: integer }
+        user:
+          $ref: '#/components/schemas/UserProfile'
+      required: [accessToken, refreshToken, tokenType, expiresInSeconds, user]
+    Author:
+      type: object
+      properties:
+        userId: { type: string }
+        userName: { type: string }
+        coverImage: { type: string, nullable: true }
+      required: [userId, userName]
+    Post:
+      type: object
+      properties:
+        postId: { type: string }
+        author: { $ref: '#/components/schemas/Author' }
+        content: { type: string }
+        image: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, nullable: true }
+      required: [postId, author, content, createdAt]
+    PostListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Post' }
+        total: { type: integer }
+      required: [items, total]
+    CreatePostRequest:
+      type: object
+      properties:
+        content: { type: string }
+        image: { type: string, nullable: true }
+      required: [content]
+    UpdatePostRequest:
+      type: object
+      properties:
+        content: { type: string, nullable: true }
+        image: { type: string, nullable: true }
+    Comment:
+      type: object
+      properties:
+        commentId: { type: string }
+        postId: { type: string }
+        author: { $ref: '#/components/schemas/Author' }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [commentId, postId, author, content, createdAt]
+    CommentListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Comment' }
+        total: { type: integer }
+      required: [items, total]
+    CreateCommentRequest:
+      type: object
+      properties:
+        content: { type: string }
+      required: [content]

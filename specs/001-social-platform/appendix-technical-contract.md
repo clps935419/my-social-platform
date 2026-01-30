@@ -20,6 +20,7 @@
 - 交易：異動多個資料表時必須使用 Transaction（任一步驟失敗需回滾）。
 - DB 腳本：DDL/DML/Stored Procedure 腳本必須放在專案根目錄 `DB/`。
 - API 文件：必須提供 OpenAPI 3 與 Swagger UI（Docker Compose 啟動後也可存取且路徑固定並寫入文件）。
+  - 固定路徑（經 nginx 對外）：`/api/swagger-ui/index.html`
 
 ## 前端實作建議（非驗收 / 供面試題快速落地）
 
