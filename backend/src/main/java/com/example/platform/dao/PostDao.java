@@ -33,25 +33,26 @@ public class PostDao extends StoredProcedureExecutor {
      * @param limit Maximum number of posts to return
      * @param offset Number of posts to skip
      * @param authorUserId Optional author user ID to filter by
+     * @param sort Sort order: "newest" or "oldest" (default: "newest")
      * @return Map with "posts" (List<Post>) and "total" (Integer)
      */
-    public Map<String, Object> listPosts(int limit, int offset, String authorUserId) {
+    public Map<String, Object> listPosts(int limit, int offset, String authorUserId, String sort) {
         Map<String, Object> params = new HashMap<>();
         params.put("p_limit", limit);
         params.put("p_offset", offset);
         
-        // Query the stored procedure with optional author filter
+        // Query the stored procedure with optional author filter and sort
         List<Post> posts;
         if (authorUserId != null) {
             posts = getJdbcTemplate().query(
-                "SELECT * FROM sp_post_list(?, ?, ?)",
-                new Object[]{limit, offset, java.util.UUID.fromString(authorUserId)},
+                "SELECT * FROM sp_post_list(?, ?, ?, ?)",
+                new Object[]{limit, offset, java.util.UUID.fromString(authorUserId), sort},
                 new PostRowMapper()
             );
         } else {
             posts = getJdbcTemplate().query(
-                "SELECT * FROM sp_post_list(?, ?, NULL)",
-                new Object[]{limit, offset},
+                "SELECT * FROM sp_post_list(?, ?, NULL, ?)",
+                new Object[]{limit, offset, sort},
                 new PostRowMapper()
             );
         }

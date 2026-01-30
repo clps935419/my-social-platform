@@ -106,4 +106,24 @@ public class RequestValidators {
             throw new IllegalArgumentException("URL must start with http:// or https://");
         }
     }
+    
+    /**
+     * Validate and normalize sort parameter
+     * 
+     * @param sort User-provided sort (null for default)
+     * @param defaultSort Default sort value
+     * @return Validated sort value
+     */
+    public static String validateSort(String sort, String defaultSort) {
+        if (sort == null || sort.trim().isEmpty()) {
+            return defaultSort;
+        }
+        
+        String normalized = sort.trim().toLowerCase();
+        if (!normalized.equals("newest") && !normalized.equals("oldest")) {
+            throw new IllegalArgumentException("Sort must be 'newest' or 'oldest'");
+        }
+        
+        return normalized;
+    }
 }

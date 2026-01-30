@@ -34,13 +34,14 @@ public class CommentDao extends StoredProcedureExecutor {
      * @param postId The post ID to get comments for
      * @param limit Maximum number of comments to return
      * @param offset Number of comments to skip
+     * @param sort Sort order: "newest" or "oldest" (default: "oldest")
      * @return Map with "comments" (List<Comment>), "total" (Integer), "postExists" (Boolean), "postDeleted" (Boolean)
      */
-    public Map<String, Object> listCommentsByPost(UUID postId, int limit, int offset) {
+    public Map<String, Object> listCommentsByPost(UUID postId, int limit, int offset, String sort) {
         // Query the stored procedure
         List<Map<String, Object>> results = getJdbcTemplate().queryForList(
-            "SELECT * FROM sp_comment_list_by_post(?, ?, ?)",
-            postId, limit, offset
+            "SELECT * FROM sp_comment_list_by_post(?, ?, ?, ?)",
+            postId, limit, offset, sort
         );
         
         Map<String, Object> result = new HashMap<>();

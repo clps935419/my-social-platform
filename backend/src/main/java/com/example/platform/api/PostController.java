@@ -45,7 +45,7 @@ public class PostController {
     @GetMapping
     @Operation(
         summary = "List posts",
-        description = "Get a paginated list of posts (newest first). Excludes soft-deleted posts. Public endpoint, no authentication required. Optionally filter by current user's posts using 'mine=true'."
+        description = "Get a paginated list of posts. Supports sorting by creation date. Excludes soft-deleted posts. Public endpoint, no authentication required. Optionally filter by current user's posts using 'mine=true'."
     )
     public ResponseEntity<PostListResponse> listPosts(
         @Parameter(description = "Maximum number of posts to return (1-100, default: 20)")
@@ -57,11 +57,15 @@ public class PostController {
         @Parameter(description = "Filter to show only current user's posts (requires authentication)")
         @RequestParam(required = false) Boolean mine,
         
+        @Parameter(description = "Sort order: 'newest' (newest first, default) or 'oldest' (oldest first)")
+        @RequestParam(required = false) String sort,
+        
         HttpServletRequest httpRequest
     ) {
         // Validate and normalize parameters
         int validatedLimit = RequestValidators.validateLimit(limit);
         int validatedOffset = RequestValidators.validateOffset(offset);
+        String validatedSort = RequestValidators.validateSort(sort, "newest");
         
         // Get user ID if filtering by current user
         String authorUserId = null;
@@ -74,7 +78,7 @@ public class PostController {
         }
         
         // Call DAO
-        Map<String, Object> result = postDao.listPosts(validatedLimit, validatedOffset, authorUserId);
+        Map<String, Object> result = postDao.listPosts(validatedLimit, validatedOffset, authorUserId, validatedSort);
         
         @SuppressWarnings("unchecked")
         List<Post> posts = (List<Post>) result.get("posts");

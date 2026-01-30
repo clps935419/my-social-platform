@@ -3,11 +3,12 @@
 -- sp_comment_list_by_post: List comments for a specific post
 -- Returns: comments array with author info, total count
 -- Returns empty result if post is soft-deleted (caller should check and return 404)
--- Parameters: p_post_id (required), p_limit (default 20), p_offset (default 0)
+-- Parameters: p_post_id (required), p_limit (default 20), p_offset (default 0), p_sort (default 'oldest')
 CREATE OR REPLACE FUNCTION sp_comment_list_by_post(
     p_post_id UUID,
     p_limit INTEGER DEFAULT 20,
-    p_offset INTEGER DEFAULT 0
+    p_offset INTEGER DEFAULT 0,
+    p_sort VARCHAR(10) DEFAULT 'oldest'
 )
 RETURNS TABLE(
     comment_id UUID,
@@ -27,7 +28,15 @@ DECLARE
     v_total_count BIGINT;
     v_post_exists BOOLEAN;
     v_post_deleted BOOLEAN;
+    v_order_direction TEXT;
 BEGIN
+    -- Validate and set order direction
+    IF p_sort = 'newest' THEN
+        v_order_direction := 'DESC';
+    ELSE
+        v_order_direction := 'ASC';  -- default to 'oldest'
+    END IF;
+    
     -- Check if post exists and if it's deleted
     SELECT 
         COUNT(*) > 0,
@@ -58,25 +67,31 @@ BEGIN
     FROM comments
     WHERE comments.post_id = p_post_id;
     
-    -- Return comments with author info
-    RETURN QUERY
-    SELECT 
-        c.comment_id,
-        c.post_id,
-        c.author_user_id,
-        u.user_name,
-        u.cover_image_url,
-        c.content,
-        c.created_at,
+    -- Return comments with author info, with dynamic ordering
+    RETURN QUERY EXECUTE format('
+        SELECT 
+            c.comment_id,
+            c.post_id,
+            c.author_user_id,
+            u.user_name,
+            u.cover_image_url,
+            c.content,
+            c.created_at,
+            %L::BIGINT,
+            TRUE,
+            FALSE
+        FROM comments c
+        INNER JOIN users u ON c.author_user_id = u.user_id
+        WHERE c.post_id = %L
+        ORDER BY c.created_at %s
+        LIMIT %L
+        OFFSET %L',
         v_total_count,
-        TRUE,  -- post_exists
-        FALSE  -- post_deleted
-    FROM comments c
-    INNER JOIN users u ON c.author_user_id = u.user_id
-    WHERE c.post_id = p_post_id
-    ORDER BY c.created_at ASC
-    LIMIT p_limit
-    OFFSET p_offset;
+        p_post_id,
+        v_order_direction,
+        p_limit,
+        p_offset
+    );
 END;
 $$;
 

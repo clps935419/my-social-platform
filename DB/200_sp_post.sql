@@ -1,12 +1,13 @@
 -- Post Stored Procedures
 
--- sp_post_list: List posts (newest first, exclude soft-deleted)
+-- sp_post_list: List posts (newest first by default, exclude soft-deleted)
 -- Returns: posts array with author info, total count
--- Parameters: p_limit (default 20), p_offset (default 0), p_author_user_id (optional filter)
+-- Parameters: p_limit (default 20), p_offset (default 0), p_author_user_id (optional filter), p_sort (default 'newest')
 CREATE OR REPLACE FUNCTION sp_post_list(
     p_limit INTEGER DEFAULT 20,
     p_offset INTEGER DEFAULT 0,
-    p_author_user_id UUID DEFAULT NULL
+    p_author_user_id UUID DEFAULT NULL,
+    p_sort VARCHAR(10) DEFAULT 'newest'
 )
 RETURNS TABLE(
     post_id UUID,
@@ -23,32 +24,47 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     v_total_count BIGINT;
+    v_order_direction TEXT;
 BEGIN
+    -- Validate and set order direction
+    IF p_sort = 'oldest' THEN
+        v_order_direction := 'ASC';
+    ELSE
+        v_order_direction := 'DESC';  -- default to 'newest'
+    END IF;
+    
     -- Get total count of non-deleted posts (with optional author filter)
     SELECT COUNT(*) INTO v_total_count
     FROM posts
     WHERE deleted_at IS NULL
       AND (p_author_user_id IS NULL OR posts.author_user_id = p_author_user_id);
     
-    -- Return posts with author info
-    RETURN QUERY
-    SELECT 
-        p.post_id,
-        p.author_user_id,
-        u.user_name,
-        u.cover_image_url,
-        p.content,
-        p.image_url,
-        p.created_at,
-        p.updated_at,
-        v_total_count
-    FROM posts p
-    INNER JOIN users u ON p.author_user_id = u.user_id
-    WHERE p.deleted_at IS NULL
-      AND (p_author_user_id IS NULL OR p.author_user_id = p_author_user_id)
-    ORDER BY p.created_at DESC
-    LIMIT p_limit
-    OFFSET p_offset;
+    -- Return posts with author info, with dynamic ordering
+    RETURN QUERY EXECUTE format('
+        SELECT 
+            p.post_id,
+            p.author_user_id,
+            u.user_name,
+            u.cover_image_url,
+            p.content,
+            p.image_url,
+            p.created_at,
+            p.updated_at,
+            %L::BIGINT
+        FROM posts p
+        INNER JOIN users u ON p.author_user_id = u.user_id
+        WHERE p.deleted_at IS NULL
+          AND (%L::UUID IS NULL OR p.author_user_id = %L::UUID)
+        ORDER BY p.created_at %s
+        LIMIT %L
+        OFFSET %L',
+        v_total_count,
+        p_author_user_id,
+        p_author_user_id,
+        v_order_direction,
+        p_limit,
+        p_offset
+    );
 END;
 $$;
 

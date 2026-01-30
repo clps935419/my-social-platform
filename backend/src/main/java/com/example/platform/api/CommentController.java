@@ -41,7 +41,7 @@ public class CommentController {
     @GetMapping
     @Operation(
         summary = "List comments for a post",
-        description = "Get a paginated list of comments for a specific post (oldest first). Returns 404 if post doesn't exist or is deleted. Public endpoint, no authentication required."
+        description = "Get a paginated list of comments for a specific post. Supports sorting by creation date. Returns 404 if post doesn't exist or is deleted. Public endpoint, no authentication required."
     )
     public ResponseEntity<CommentListResponse> listComments(
         @Parameter(description = "Post ID (UUID format)")
@@ -51,7 +51,10 @@ public class CommentController {
         @RequestParam(required = false) Integer limit,
         
         @Parameter(description = "Number of comments to skip (default: 0)")
-        @RequestParam(required = false) Integer offset
+        @RequestParam(required = false) Integer offset,
+        
+        @Parameter(description = "Sort order: 'newest' (newest first) or 'oldest' (oldest first, default)")
+        @RequestParam(required = false) String sort
     ) {
         // Parse and validate UUID
         UUID postUuid;
@@ -64,9 +67,10 @@ public class CommentController {
         // Validate and normalize parameters
         int validatedLimit = RequestValidators.validateLimit(limit);
         int validatedOffset = RequestValidators.validateOffset(offset);
+        String validatedSort = RequestValidators.validateSort(sort, "oldest");
         
         // Call DAO
-        Map<String, Object> result = commentDao.listCommentsByPost(postUuid, validatedLimit, validatedOffset);
+        Map<String, Object> result = commentDao.listCommentsByPost(postUuid, validatedLimit, validatedOffset, validatedSort);
         
         Boolean postExists = (Boolean) result.get("postExists");
         Boolean postDeleted = (Boolean) result.get("postDeleted");
