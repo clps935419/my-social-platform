@@ -218,6 +218,33 @@ NGINX_PORT=80
 
 ## 🐛 Troubleshooting
 
+### Cannot connect to API through nginx (502/503 errors)
+
+The reverse proxy requires the backend service to be running. Check:
+
+```bash
+# 1. Verify all services are running
+docker compose ps
+
+# 2. Check backend logs
+docker compose logs app
+
+# 3. Test backend directly (bypassing nginx)
+curl http://localhost:8080/api/health
+
+# 4. Check nginx logs
+docker compose logs nginx
+
+# 5. Restart services in order
+docker compose restart app
+docker compose restart nginx
+```
+
+**Common causes:**
+- Backend is still starting (Maven downloading dependencies on first run - can take 3-5 minutes)
+- Backend failed to start (check logs for errors)
+- Network connectivity issues between containers
+
 ### Services won't start
 ```bash
 # Check logs
@@ -245,6 +272,17 @@ docker compose logs db
 # Change ports in .env
 POSTGRES_PORT=5433
 NGINX_PORT=8000
+```
+
+### Backend takes long time to start
+
+On first run, Maven needs to download all dependencies (Spring Boot, PostgreSQL driver, etc.). This is normal and can take 3-5 minutes depending on your internet connection.
+
+```bash
+# Monitor backend startup
+docker compose logs -f app
+
+# You should see Maven downloading dependencies, then Spring Boot starting
 ```
 
 ## 📄 License
