@@ -121,4 +121,50 @@ public class CommentDao extends StoredProcedureExecutor {
         
         return comment;
     }
+    
+    /**
+     * Create a new comment on a post using sp_comment_create stored procedure
+     * 
+     * @param actorUserId The user ID creating the comment
+     * @param postId The post ID to comment on
+     * @param content The comment content
+     * @return Map with "comment" (Comment), "postExists" (Boolean), "postDeleted" (Boolean)
+     */
+    public Map<String, Object> createComment(UUID actorUserId, UUID postId, String content) {
+        // Query the stored procedure
+        List<Map<String, Object>> results = getJdbcTemplate().queryForList(
+            "SELECT * FROM sp_comment_create(?, ?, ?)",
+            actorUserId, postId, content
+        );
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        // Check if we got a result
+        if (results.isEmpty()) {
+            result.put("comment", null);
+            result.put("postExists", false);
+            result.put("postDeleted", false);
+            return result;
+        }
+        
+        // Get first row with metadata
+        Map<String, Object> firstRow = results.get(0);
+        Boolean postExists = (Boolean) firstRow.get("post_exists");
+        Boolean postDeleted = (Boolean) firstRow.get("post_deleted");
+        
+        result.put("postExists", postExists != null ? postExists : false);
+        result.put("postDeleted", postDeleted != null ? postDeleted : false);
+        
+        // If post doesn't exist or is deleted, return without comment
+        if (!Boolean.TRUE.equals(postExists) || Boolean.TRUE.equals(postDeleted)) {
+            result.put("comment", null);
+            return result;
+        }
+        
+        // Parse the comment
+        Comment comment = mapRowToComment(firstRow);
+        result.put("comment", comment);
+        
+        return result;
+    }
 }
