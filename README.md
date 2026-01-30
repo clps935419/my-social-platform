@@ -69,7 +69,30 @@ cd frontend
 npm install
 npm run dev      # Dev server on http://localhost:5173
 npm run build    # Build for production
+npm run gen:sdk  # Generate API SDK from backend OpenAPI spec
 ```
+
+##### SDK Generation Workflow
+
+**Automatic SDK Generation**:
+The frontend uses [@hey-api/openapi-ts](https://github.com/hey-api/openapi-ts) to generate TypeScript API client from backend's OpenAPI specification.
+
+**How to regenerate SDK**:
+```bash
+# 1. Ensure backend is running (API docs must be accessible)
+docker compose up -d app
+
+# 2. Generate SDK
+cd frontend
+npm run gen:sdk
+```
+
+**Important Notes**:
+- **Generated code location**: `frontend/src/api/generated/`
+- **DO NOT manually edit generated files** - they will be overwritten on next generation
+- **Generated code is NOT committed to git** - it's treated as build artifact
+- **Regenerate SDK whenever backend API changes** - keep frontend in sync
+- SDK uses `@tanstack/vue-query` for data fetching and `axios` for HTTP client
 
 #### Backend
 ```bash
