@@ -4,14 +4,14 @@
 
 **Tech Stack**: Spring Boot 3 + Vue 3 + PostgreSQL 16 + Nginx
 
-## 🚀 Quick Start (只需 Docker)
+## 🚀 Quick Start (需安裝 Docker)
 
 ```bash
 # 1. 複製環境變數
 cp .env.example .env
 
-# 2. 啟動所有服務
-make up
+# 2. 啟動正式環境
+make production
 
 # 3. 開啟瀏覽器
 # Frontend: http://localhost/
@@ -19,17 +19,16 @@ make up
 # Swagger UI: http://localhost:8080/api/swagger-ui/index.html
 ```
 
-**首次啟動需等待 3-5 分鐘** (Maven 下載依賴)
 
 ## 📋 常用指令
 
 ```bash
-make up          # 啟動服務
-make down        # 停止服務
-make logs        # 查看日誌
-make ps          # 查看狀態
-make health      # 健康檢查
-make clean       # 清除所有資料重新開始
+make dev             # 啟動服務 (需要時自動 build)
+make logs            # 查看日誌
+make production      # 只用 Docker 的正式環境部署
+make production-down # 停止正式環境
+make volumes-reset   # 清除 volume 並重建
+make clean           # 清除容器、volume、前後端建置產物
 ```
 
 ## 🏗️ 架構說明
@@ -74,15 +73,10 @@ cd backend
 mvn spring-boot:run  # 需要 Java 17+
 ```
 
-### 熱重載
-- **Frontend**: 修改 `frontend/src/` 自動重新編譯
-- **Backend**: 修改 `backend/src/` 自動重啟 (spring-boot-devtools)
-
-## 📝 實作進度
-
-**已完成**: Phase 1 & 2 (專案建置與基礎架構) ✅
-
-詳細進度請參考 [IMPLEMENTATION_SUMMARY.md](./reports/IMPLEMENTATION_SUMMARY.md)
+### 本機用 Docker 開發
+```bash
+make dev
+```
 
 ## 🔧 環境變數設定
 
@@ -92,29 +86,6 @@ POSTGRES_DB=social_platform
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 JWT_SECRET=your-secret-here-min-32-chars
-```
-
-## 🐛 常見問題
-
-### 服務無法啟動
-```bash
-make logs        # 查看錯誤日誌
-make ps          # 檢查服務狀態
-make clean       # 清除後重新啟動
-make up
-```
-
-### 首次啟動很慢
-正常現象，Maven 需下載依賴 (3-5 分鐘)
-```bash
-make logs -f app  # 監控後端啟動進度
-```
-
-### Port 衝突
-編輯 `.env` 修改 port:
-```bash
-NGINX_PORT=8000
-POSTGRES_PORT=5433
 ```
 
 ## 📚 詳細文件
