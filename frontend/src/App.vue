@@ -78,7 +78,7 @@ function handleLogout() {
   clearSession();
   clearMeQuery(queryClient);
   ElMessage.info('已登出');
-  
+
   // Refresh current page
   router.go(0);
 }

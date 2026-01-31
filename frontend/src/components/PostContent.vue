@@ -5,7 +5,7 @@
 <script setup lang="ts">
 /**
  * PostContent component - Renders user-provided content as plain text
- * 
+ *
  * XSS Prevention:
  * - Uses Vue's default interpolation ({{ }}) which auto-escapes HTML
  * - NEVER uses v-html to prevent XSS attacks

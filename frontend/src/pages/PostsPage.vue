@@ -83,14 +83,16 @@ const sortOrder = ref<'newest' | 'oldest'>('newest');
 const mineOnly = ref(false);
 
 // Create computed query options that update when offset changes
-const queryOptions = computed(() => listPostsOptions({
-  query: {
-    limit,
-    offset: offset.value,
-    sort: sortOrder.value,
-    mine: mineOnly.value,
-  },
-}));
+const queryOptions = computed(() =>
+  listPostsOptions({
+    query: {
+      limit,
+      offset: offset.value,
+      sort: sortOrder.value,
+      mine: mineOnly.value,
+    },
+  })
+);
 
 const { data, isLoading, error, refetch } = useQuery(queryOptions);
 

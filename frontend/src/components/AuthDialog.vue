@@ -102,6 +102,7 @@ import { login, register } from '../api/generated/sdk.gen';
 import type { LoginRequest, RegisterRequest, AuthResponse } from '../api/generated/types.gen';
 import { saveSession } from '../auth/session';
 import { invalidateMeQuery } from '../queries/me';
+import { isAxiosError } from 'axios';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -211,7 +212,7 @@ async function handleSubmit() {
         phoneNumber,
         password: form.password,
       };
-      
+
       const response = await login({
         body: loginPayload,
       });
@@ -225,7 +226,7 @@ async function handleSubmit() {
         userName: form.name,
         password: form.password,
       };
-      
+
       const response = await register({
         body: registerPayload,
       });
@@ -233,8 +234,8 @@ async function handleSubmit() {
       const data = response.data as AuthResponse;
       handleLoginSuccess(data);
     }
-  } catch (error: any) {
-    const message = error?.response?.data?.message || error?.message || '操作失敗';
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, '操作失敗');
     ElMessage.error(message);
   } finally {
     isLoading.value = false;
@@ -242,10 +243,15 @@ async function handleSubmit() {
 }
 
 function handleLoginSuccess(data: AuthResponse) {
+  if (!data.accessToken || !data.refreshToken) {
+    ElMessage.error('登入資訊不完整，請重新登入');
+    return;
+  }
+
   // Save session
   saveSession({
-    accessToken: data.accessToken!,
-    refreshToken: data.refreshToken!,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
     user: data.user,
   });
 
@@ -275,6 +281,17 @@ function handleClose() {
   form.confirmPassword = '';
   form.region = '+886';
   isLogin.value = true;
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message || error.message || fallback;
+  }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+  return fallback;
 }
 </script>
 

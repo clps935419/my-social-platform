@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
+import { isAxiosError } from 'axios';
 import { useQueryClient } from '@tanstack/vue-query';
 import { createPost } from '../api/generated/sdk.gen';
 
@@ -83,12 +84,23 @@ async function handleSubmit() {
     });
 
     emit('post-created');
-  } catch (error: any) {
-    const message = error?.response?.data?.message || '發佈失敗';
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, '發佈失敗');
     ElMessage.error(message);
   } finally {
     isLoading.value = false;
   }
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message || error.message || fallback;
+  }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+  return fallback;
 }
 </script>
 

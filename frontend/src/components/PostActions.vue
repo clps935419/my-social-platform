@@ -66,6 +66,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
 import { updatePost, deletePost } from '../api/generated/sdk.gen';
 import { useMeQuery } from '../queries/me';
+import { isAxiosError } from 'axios';
 
 const props = defineProps<{
   postId: string;
@@ -131,8 +132,8 @@ async function handleUpdate() {
     });
 
     emit('updated');
-  } catch (error: any) {
-    const message = error?.response?.data?.message || '更新失敗';
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, '更新失敗');
     ElMessage.error(message);
   } finally {
     isUpdating.value = false;
@@ -163,14 +164,25 @@ async function handleDelete() {
     });
 
     emit('deleted');
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error === 'cancel') {
       // User cancelled
       return;
     }
-    const message = error?.response?.data?.message || '刪除失敗';
+    const message = getErrorMessage(error, '刪除失敗');
     ElMessage.error(message);
   }
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message || error.message || fallback;
+  }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+  return fallback;
 }
 </script>
 

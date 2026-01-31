@@ -53,7 +53,7 @@ export const configureApiClient = () => {
     const token = getAccessToken();
     if (token) {
       config.headers = config.headers || {};
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   });
@@ -80,7 +80,7 @@ export const configureApiClient = () => {
 
         if (newToken) {
           // Retry original request with new token
-          originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return axiosInstance.request(originalRequest);
         }
 

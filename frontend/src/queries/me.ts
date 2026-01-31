@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { getProfile } from '../api/generated/sdk.gen';
 import type { UserProfileResponse } from '../api/generated/types.gen';
 import { getAccessToken, clearSession } from '../auth/session';
+import type { AxiosError } from 'axios';
 
 /**
  * Query key for /me endpoint
@@ -27,7 +28,8 @@ export function useMeQuery() {
         return response.data as UserProfileResponse;
       } catch (error) {
         // If 401, clear session
-        if ((error as any)?.response?.status === 401) {
+        const axiosError = error as AxiosError | null;
+        if (axiosError?.response?.status === 401) {
           clearSession();
           queryClient.clear();
         }
