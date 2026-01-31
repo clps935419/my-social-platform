@@ -2,6 +2,7 @@ import { client as heyClient } from './generated/client.gen';
 import { refresh } from './generated/sdk.gen';
 import { getAccessToken, getRefreshToken, saveSession, clearSession } from '../auth/session';
 import type { RefreshResponse2 } from './generated/types.gen';
+import axios from 'axios';
 
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
@@ -37,19 +38,6 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
-/**
- * Get access token with single-flight refresh
- */
-async function getAccessTokenWithRefresh(): Promise<string | null> {
-  if (isRefreshing && refreshPromise) {
-    // Wait for ongoing refresh
-    return refreshPromise;
-  }
-
-  const token = getAccessToken();
-  return token;
-}
-
 export const configureApiClient = () => {
   // Ensure the generated Hey API client uses the same baseURL as nginx/vite proxy.
   // This avoids hard-coding http://localhost:8080/api in the generated client.
@@ -57,8 +45,11 @@ export const configureApiClient = () => {
     baseURL: '/api',
   });
 
+  // Get the underlying axios instance from the Hey API client
+  const axiosInstance = heyClient.instance;
+
   // Add request interceptor to attach access token
-  heyClient.interceptors.request.use((config) => {
+  axiosInstance.interceptors.request.use((config) => {
     const token = getAccessToken();
     if (token) {
       config.headers = config.headers || {};
@@ -68,7 +59,7 @@ export const configureApiClient = () => {
   });
 
   // Add response interceptor to handle 401 and retry with refresh
-  heyClient.interceptors.response.use(
+  axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
@@ -90,7 +81,7 @@ export const configureApiClient = () => {
         if (newToken) {
           // Retry original request with new token
           originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-          return heyClient.request(originalRequest);
+          return axiosInstance.request(originalRequest);
         }
 
         // Refresh failed, redirect to login or show message
