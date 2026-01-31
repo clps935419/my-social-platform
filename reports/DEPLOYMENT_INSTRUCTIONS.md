@@ -271,6 +271,80 @@ SELECT * FROM posts WHERE deleted_at IS NULL;  # View active posts
 
 ---
 
+## 🚀 Production Deployment (T083 & T082)
+
+### Production Build Strategy
+
+The production deployment:
+- Uses **pre-built frontend** (`frontend/dist` is committed to git)
+- Uses **multi-stage Docker build** for backend (Maven build + JRE runtime)
+- **No local Node.js or Maven required** - only Docker needed
+- Container starts with `java -jar` (not `mvn spring-boot:run`)
+- No development volume mounts or maven cache
+
+### Prerequisites for Production
+
+- Docker & Docker Compose only (no Node.js/Maven required)
+- `.env` file configured with production secrets
+
+### Deploy Production
+
+```bash
+# One-command production deployment
+make production
+
+# Or using docker compose directly
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+### Production vs Development
+
+| Aspect | Development | Production |
+|--------|-------------|------------|
+| **Backend Build** | `mvn spring-boot:run` in container | Multi-stage: Maven build → JRE runtime |
+| **Frontend** | Hot reload from `src/` | Pre-built `dist/` (committed) |
+| **Volume Mounts** | Source code mounted | No source mounts |
+| **Maven Cache** | Cached in volume | Not used |
+| **Startup Time** | Slow (downloads deps) | Fast (pre-built JAR) |
+| **Use Case** | Local development | Deployment/Production |
+
+### Production Architecture
+
+```
+docker-compose.prod.yml:
+├── db (PostgreSQL 16)
+├── app (Spring Boot JAR - built via Dockerfile.prod)
+└── nginx (serves frontend/dist + proxies /api)
+```
+
+### Verify Production Deployment
+
+```bash
+# Check services
+docker compose -f docker-compose.prod.yml ps
+
+# Test frontend
+curl http://localhost/
+
+# Test backend API
+curl http://localhost/api/health
+
+# Expected response:
+# {"status":"UP","timestamp":"2026-01-31T17:00:00Z"}
+```
+
+### Stop Production
+
+```bash
+# Stop production services
+docker compose -f docker-compose.prod.yml down
+
+# Or using Makefile
+make production-down
+```
+
+---
+
 ## 🔒 Security Notes
 
 ### For Production Deployment:
@@ -287,7 +361,7 @@ SELECT * FROM posts WHERE deleted_at IS NULL;  # View active posts
    - Update `nginx/default.conf`
 
 3. **Restrict Database Access**:
-   - Remove database port exposure in `docker-compose.yml`
+   - Remove database port exposure in `docker-compose.prod.yml`
    - Or bind to localhost only: `127.0.0.1:5432:5432`
 
 4. **Update CORS Settings** (if needed):

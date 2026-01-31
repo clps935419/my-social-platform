@@ -1,4 +1,4 @@
-.PHONY: help build up down restart logs ps clean install-frontend build-frontend dev
+.PHONY: help build up down restart logs ps clean install-frontend build-frontend dev production production-down
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -51,3 +51,9 @@ health: ## Check health of all services
 	@curl -f http://localhost:8080/api/health || echo "Backend not ready"
 	@echo "Checking nginx..."
 	@curl -f http://localhost/health || echo "Nginx not ready"
+
+production: ## Start production deployment (requires only Docker, no Node/Maven)
+	docker compose -f docker-compose.prod.yml up -d --build
+
+production-down: ## Stop production deployment
+	docker compose -f docker-compose.prod.yml down

@@ -18,7 +18,9 @@ A simple social media platform with phone number authentication, posts, and comm
 - (Optional) Node.js 20+ for local frontend development
 - (Optional) Java 17+ & Maven for local backend development
 
-### 1. Start All Services
+### Development Mode
+
+#### 1. Start All Services
 
 ```bash
 # Copy environment template
@@ -31,13 +33,13 @@ make up
 docker compose up -d --build
 ```
 
-### 2. Check Service Health
+#### 2. Check Service Health
 
 ```bash
 make health
 ```
 
-### 3. Access the Application
+#### 3. Access the Application
 
 - **Frontend**: http://localhost/
 - **Backend API**: http://localhost/api/health
@@ -46,10 +48,39 @@ make health
   - Not exposed through reverse proxy
 - **Database**: localhost:5432
 
+### Production Mode (T082)
+
+**One-command deployment** - requires only Docker, no Node.js or Maven needed:
+
+```bash
+# Copy environment template (if not already done)
+cp .env.example .env
+
+# Start production services
+make production
+```
+
+**What's different in production:**
+- ✅ Uses pre-built frontend (`frontend/dist` is committed)
+- ✅ Backend is compiled to JAR (multi-stage build)
+- ✅ Faster startup (no dependency downloads)
+- ✅ No source code volume mounts
+- ✅ Runs with `java -jar` (not `mvn spring-boot:run`)
+
+**Access Points** (same as development):
+- **Frontend**: http://localhost/
+- **Backend API**: http://localhost/api/health
+
+**Stop production:**
+```bash
+make production-down
+```
+
 ## 🛠️ Development
 
 ### Make Commands
 
+#### Development Commands
 ```bash
 make help        # Show all available commands
 make up          # Start all services
@@ -59,6 +90,12 @@ make logs        # Show logs (follow mode)
 make ps          # Show service status
 make clean       # Stop and remove everything
 make health      # Check service health
+```
+
+#### Production Commands
+```bash
+make production       # Start production deployment (one-command, Docker only)
+make production-down  # Stop production deployment
 ```
 
 ### Local Development
