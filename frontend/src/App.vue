@@ -2,7 +2,9 @@
   <div class="app-layout">
     <!-- Header -->
     <header class="header">
-      <div class="brand" @click="goHome">SocialApp</div>
+      <div class="brand" @click="goHome" aria-label="SocialApp">
+        <span class="brand-logo">S</span>
+      </div>
       <div class="user-area">
         <template v-if="!currentUser">
           <el-button type="primary" plain @click="showAuthDialog = true">
@@ -114,10 +116,24 @@ body {
 }
 
 .brand {
-  font-size: 20px;
-  font-weight: 700;
-  color: #409eff;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #409eff 0%, #2dd4bf 100%);
+  letter-spacing: -0.5px;
+  user-select: none;
 }
 
 .user-area {

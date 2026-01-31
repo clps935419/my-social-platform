@@ -11,10 +11,11 @@
     <el-form
       ref="formRef"
       :model="form"
+      :rules="rules"
       label-position="top"
       @submit.prevent="handleSubmit"
     >
-      <el-form-item label="手機號碼" required>
+      <el-form-item label="手機號碼" prop="phone">
         <el-input
           v-model="form.phone"
           placeholder="請輸入手機號碼 (如: 912345678)"
@@ -36,7 +37,7 @@
         </el-input>
       </el-form-item>
 
-      <el-form-item v-if="!isLogin" label="姓名" required>
+      <el-form-item v-if="!isLogin" label="姓名" prop="name" required>
         <el-input
           v-model="form.name"
           placeholder="請輸入您的姓名"
@@ -44,7 +45,7 @@
         />
       </el-form-item>
 
-      <el-form-item label="密碼" required>
+      <el-form-item label="密碼" prop="password">
         <el-input
           v-model="form.password"
           type="password"
@@ -55,7 +56,7 @@
         />
       </el-form-item>
 
-      <el-form-item v-if="!isLogin" label="確認密碼" required>
+      <el-form-item v-if="!isLogin" label="確認密碼" prop="confirmPassword">
         <el-input
           v-model="form.confirmPassword"
           type="password"
@@ -80,7 +81,7 @@
             {{ isLogin ? '登入' : '註冊' }}
           </el-button>
         </div>
-        <div style="text-align: center; font-size: 14px; color: #909399">
+        <div style="display:flex; align-items: center; justify-content: center; font-size: 14px; color: #909399">
           <span v-if="isLogin">還沒有帳號？</span>
           <span v-else>已經有帳號？</span>
           <el-link type="primary" @click="toggleMode" style="margin-left: 4px">
@@ -95,6 +96,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
+import type { FormInstance, FormRules } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
 import { login, register } from '../api/generated/sdk.gen';
 import type { LoginRequest, RegisterRequest, AuthResponse } from '../api/generated/types.gen';
@@ -112,6 +114,7 @@ const emit = defineEmits<{
 
 const queryClient = useQueryClient();
 
+const formRef = ref<FormInstance>();
 const visible = ref(props.modelValue);
 const isLogin = ref(true);
 const isLoading = ref(false);
@@ -123,6 +126,45 @@ const form = reactive({
   password: '',
   confirmPassword: '',
 });
+
+const rules: FormRules = {
+  phone: [
+    { required: true, message: '請輸入手機號碼', trigger: 'blur' },
+    { pattern: /^\d{8,12}$/, message: '請輸入正確手機號碼格式', trigger: 'blur' },
+  ],
+  name: [
+    {
+      validator: (_rule, value, callback) => {
+        if (isLogin.value) return callback();
+        if (!value || !value.trim()) return callback(new Error('請輸入姓名'));
+        return callback();
+      },
+      trigger: 'blur',
+    },
+  ],
+  password: [
+    { required: true, message: '請輸入密碼', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (isLogin.value) return callback();
+        if (!value || value.length < 6) return callback(new Error('密碼長度至少為 6 個字元'));
+        return callback();
+      },
+      trigger: 'blur',
+    },
+  ],
+  confirmPassword: [
+    {
+      validator: (_rule, value, callback) => {
+        if (isLogin.value) return callback();
+        if (!value) return callback(new Error('請再次輸入密碼'));
+        if (value !== form.password) return callback(new Error('兩次輸入的密碼不一致'));
+        return callback();
+      },
+      trigger: 'blur',
+    },
+  ],
+};
 
 watch(
   () => props.modelValue,
@@ -151,38 +193,12 @@ function toggleMode() {
   // Clear password fields when switching
   form.password = '';
   form.confirmPassword = '';
-}
-
-function validateForm(): boolean {
-  if (!form.phone || !form.password) {
-    ElMessage.warning('請輸入完整的資訊');
-    return false;
-  }
-
-  if (!isLogin.value) {
-    if (!form.name || !form.name.trim()) {
-      ElMessage.warning('請輸入姓名');
-      return false;
-    }
-
-    if (form.password !== form.confirmPassword) {
-      ElMessage.warning('兩次輸入的密碼不一致');
-      return false;
-    }
-
-    if (form.password.length < 6) {
-      ElMessage.warning('密碼長度至少為 6 個字元');
-      return false;
-    }
-  }
-
-  return true;
+  formRef.value?.clearValidate();
 }
 
 async function handleSubmit() {
-  if (!validateForm()) {
-    return;
-  }
+  const isValid = await formRef.value?.validate().catch(() => false);
+  if (!isValid) return;
 
   isLoading.value = true;
 

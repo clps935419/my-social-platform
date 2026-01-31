@@ -64,9 +64,12 @@ async function handleSubmit() {
     // Clear input
     content.value = '';
 
-    // Invalidate comments query using correct query key
+    // Invalidate comments query for this post using generated query key
     queryClient.invalidateQueries({
-      queryKey: ['listComments'],
+      predicate: (query) => {
+        const key = query.queryKey?.[0] as { _id?: string; path?: { postId?: string } } | undefined;
+        return key?._id === 'listComments' && key?.path?.postId === props.postId;
+      },
     });
 
     emit('comment-created');

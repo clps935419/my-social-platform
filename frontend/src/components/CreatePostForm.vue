@@ -20,18 +20,6 @@
       </el-form-item>
 
       <el-form-item>
-        <el-input
-          v-model="imageUrl"
-          placeholder="圖片網址 (選填，http/https)"
-          maxlength="2048"
-        >
-          <template #prepend>
-            <el-icon><Picture /></el-icon>
-          </template>
-        </el-input>
-      </el-form-item>
-
-      <el-form-item>
         <div style="display: flex; justify-content: flex-end; width: 100%">
           <el-button
             type="primary"
@@ -56,7 +44,6 @@ import { createPost } from '../api/generated/sdk.gen';
 const queryClient = useQueryClient();
 
 const content = ref('');
-const imageUrl = ref('');
 const isLoading = ref(false);
 
 const emit = defineEmits<{
@@ -67,24 +54,9 @@ const isValid = computed(() => {
   return content.value.trim().length > 0;
 });
 
-function validateImageUrl(url: string): boolean {
-  if (!url) return true; // Empty is OK
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
 async function handleSubmit() {
   if (!isValid.value) {
     ElMessage.warning('請輸入貼文內容');
-    return;
-  }
-
-  if (imageUrl.value && !validateImageUrl(imageUrl.value)) {
-    ElMessage.warning('圖片網址格式不正確，請使用 http 或 https 開頭的網址');
     return;
   }
 
@@ -94,7 +66,6 @@ async function handleSubmit() {
     await createPost({
       body: {
         content: content.value,
-        image: imageUrl.value || undefined,
       },
     });
 
@@ -102,10 +73,14 @@ async function handleSubmit() {
 
     // Clear form
     content.value = '';
-    imageUrl.value = '';
 
-    // Invalidate posts query to refresh list using correct query key
-    queryClient.invalidateQueries({ queryKey: ['listPosts'] });
+    // Invalidate posts query to refresh list using generated query key
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey?.[0] as { _id?: string } | undefined;
+        return key?._id === 'listPosts';
+      },
+    });
 
     emit('post-created');
   } catch (error: any) {

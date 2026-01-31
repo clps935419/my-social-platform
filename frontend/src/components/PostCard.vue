@@ -40,7 +40,8 @@
       <template #comment-input>
         <CreateCommentForm v-if="currentUser" :post-id="post.postId!" />
         <div v-else class="guest-notice">
-          <el-link type="primary" @click="$emit('login-required')">登入</el-link> 後即可參與討論
+          <el-link type="primary" @click="$emit('login-required')">登入</el-link>
+          <span>後即可參與討論</span>
         </div>
       </template>
     </CommentsSection>
@@ -82,8 +83,8 @@ const {
   })
 );
 
-const comments = computed(() => commentsData.value?.data?.items ?? []);
-const commentsTotal = computed(() => commentsData.value?.data?.total ?? 0);
+const comments = computed(() => commentsData.value?.items ?? []);
+const commentsTotal = computed(() => commentsData.value?.total ?? 0);
 </script>
 
 <style scoped>
@@ -131,6 +132,10 @@ const commentsTotal = computed(() => commentsData.value?.data?.total ?? 0);
 
 .guest-notice {
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
   color: #909399;
   font-size: 13px;
   padding: 8px 0;

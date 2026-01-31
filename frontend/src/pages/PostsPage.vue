@@ -5,6 +5,25 @@
       <CreatePostForm v-if="currentUser" />
     </transition>
 
+    <div class="posts-toolbar">
+      <div class="sort-group">
+        <el-radio-group v-model="sortOrder" size="small" class="sort-buttons">
+          <el-radio-button label="newest">最新</el-radio-button>
+          <el-radio-button label="oldest">最舊</el-radio-button>
+        </el-radio-group>
+      </div>
+      <div v-if="currentUser" class="mine-toggle">
+        <el-button
+          size="small"
+          :type="mineOnly ? 'primary' : 'default'"
+          :disabled="!currentUser"
+          @click="mineOnly = !mineOnly"
+        >
+          只看我
+        </el-button>
+      </div>
+    </div>
+
     <div v-if="isLoading" style="text-align: center; padding: 40px">
       <el-icon class="is-loading" size="32"><Loading /></el-icon>
       <p style="color: #909399; margin-top: 16px">載入中...</p>
@@ -61,19 +80,33 @@ const showAuthDialog = ref(false);
 const limit = 10;
 const currentPage = ref(1);
 const offset = computed(() => (currentPage.value - 1) * limit);
+const sortOrder = ref<'newest' | 'oldest'>('newest');
+const mineOnly = ref(false);
 
 // Create computed query options that update when offset changes
 const queryOptions = computed(() => listPostsOptions({
   query: {
     limit,
     offset: offset.value,
+    sort: sortOrder.value,
+    mine: mineOnly.value,
   },
 }));
 
 const { data, isLoading, error, refetch } = useQuery(queryOptions);
 
-const posts = computed(() => data.value?.data?.items ?? []);
-const total = computed(() => data.value?.data?.total ?? 0);
+const posts = computed(() => data.value?.items ?? []);
+const total = computed(() => data.value?.total ?? 0);
+
+watch([sortOrder, mineOnly], () => {
+  currentPage.value = 1;
+});
+
+watch(currentUser, (user) => {
+  if (!user) {
+    mineOnly.value = false;
+  }
+});
 
 function handlePageChange(page: number) {
   currentPage.value = page;
@@ -87,4 +120,30 @@ function handlePageChange(page: number) {
   margin: 0 auto;
   padding: 20px;
 }
+
+.posts-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sort-group,
+.mine-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-buttons :deep(.el-radio-button__inner) {
+  padding: 6px 14px;
+}
+
+.mine-toggle :deep(.el-button) {
+  padding: 6px 14px;
+  height: 28px;
+  line-height: 16px;
+}
+
 </style>
