@@ -138,6 +138,11 @@
             border-radius: 4px;
         }
 
+        /* Login Modal Specific Styles */
+        .phone-input-select {
+            width: 100px;
+        }
+
         /* Helper Classes */
         .flex-row { display: flex; align-items: center; }
         .justify-end { justify-content: flex-end; }
@@ -154,14 +159,12 @@
                 <div class="brand" @click="resetView">SocialApp</div>
                 
                 <div class="user-area">
-                    <!-- 未登入狀態 -->
                     <template v-if="!isLoggedIn">
                         <el-button type="primary" plain @click="openLoginModal">
                             <el-icon class="mr-2"><User /></el-icon> 登入
                         </el-button>
                     </template>
 
-                    <!-- 已登入狀態 -->
                     <template v-else>
                         <el-dropdown trigger="click">
                             <span class="el-dropdown-link flex-row" style="cursor: pointer;">
@@ -184,7 +187,7 @@
             <!-- 2. 主內容區域 -->
             <main class="main-content">
                 
-                <!-- A. 發文區塊 (僅登入顯示) -->
+                <!-- A. 發文區塊 -->
                 <transition name="el-fade-in">
                     <el-card v-if="isLoggedIn" class="create-post-card" shadow="hover">
                         <template #header>
@@ -207,16 +210,15 @@
                     </el-card>
                 </transition>
 
-                <!-- B. 貼文列表 (所有人可見) -->
+                <!-- B. 貼文列表 -->
                 <div v-if="posts.length === 0" style="text-align: center; padding: 40px; color: #909399;">
                     <el-empty description="目前沒有任何貼文"></el-empty>
                 </div>
 
                 <div v-else>
                     <el-card v-for="post in posts" :key="post.id" class="post-card" body-style="padding: 20px;">
-                        <!-- 貼文 Header -->
                         <div class="post-header">
-                            <el-avatar :size="40" :src="post.avatarUrl" style="background: #E6A23C;">
+                            <el-avatar :size="40" style="background: #E6A23C;">
                                 {{ post.author.charAt(0) }}
                             </el-avatar>
                             <div class="post-meta">
@@ -225,17 +227,14 @@
                             </div>
                         </div>
 
-                        <!-- 貼文內容 -->
                         <div class="post-body">{{ post.content }}</div>
 
-                        <!-- 互動與評論 -->
                         <div class="post-actions">
                             <el-divider content-position="left">
                                 <span style="font-size: 12px; color: #909399;">留言區 ({{ post.comments.length }})</span>
                             </el-divider>
                         </div>
 
-                        <!-- 評論列表 -->
                         <div class="comments-section">
                             <div v-if="post.comments.length > 0">
                                 <div v-for="comment in post.comments" :key="comment.id" class="comment-item">
@@ -247,7 +246,6 @@
                                 搶頭香！成為第一個留言的人。
                             </div>
 
-                            <!-- 留言輸入框 (僅登入顯示) -->
                             <div class="mt-2">
                                 <div v-if="isLoggedIn" class="flex-row" style="gap: 8px;">
                                     <el-input 
@@ -264,22 +262,34 @@
                         </div>
                     </el-card>
                 </div>
-
             </main>
         </div>
 
-        <!-- 3. 登入 Modal (無路由) -->
+        <!-- 3. 登入 Modal -->
         <el-dialog
             v-model="loginVisible"
             title="會員登入"
             width="90%"
-            style="max-width: 400px;"
+            style="max-width: 420px;"
             align-center
             destroy-on-close
         >
             <el-form :model="loginForm" label-position="top" @submit.prevent>
                 <el-form-item label="手機號碼">
-                    <el-input v-model="loginForm.phone" placeholder="例如: 0912345678" prefix-icon="Iphone">
+                    <el-input 
+                        v-model="loginForm.phone" 
+                        placeholder="請輸入手機號碼 (如: 912345678)"
+                        type="tel"
+                        @input="handlePhoneInput"
+                    >
+                        <template #prepend>
+                            <el-select v-model="loginForm.region" placeholder="國碼" class="phone-input-select">
+                                <el-option label="+886 (台灣)" value="+886"></el-option>
+                                <el-option label="+852 (香港)" value="+852"></el-option>
+                                <el-option label="+86 (中國)" value="+86"></el-option>
+                                <el-option label="+1 (美國)" value="+1"></el-option>
+                            </el-select>
+                        </template>
                     </el-input>
                 </el-form-item>
                 <el-form-item label="密碼">
@@ -306,76 +316,71 @@
     </div>
 
     <script>
-        const { createApp, ref, reactive, computed } = Vue;
+        const { createApp, ref, reactive, watch } = Vue;
         const { ElMessage, ElNotification } = ElementPlus;
-        const { User, EditPen, ArrowDown, Iphone, Lock } = ElementPlusIconsVue;
+        const { User, EditPen, ArrowDown, Lock } = ElementPlusIconsVue;
 
         const app = createApp({
             setup() {
-                // --- 狀態 State ---
                 const isLoggedIn = ref(false);
                 const loginVisible = ref(false);
                 const isLoginLoading = ref(false);
                 const newPostContent = ref('');
                 
-                // 模擬當前使用者
                 const currentUser = ref({
                     name: '',
                     id: ''
                 });
 
-                // 登入表單
                 const loginForm = reactive({
+                    region: '+886',
                     phone: '',
                     password: ''
                 });
 
-                // 模擬資料庫 (Mock Data)
+                // 處理手機號碼輸入：自動過濾掉首位 0
+                const handlePhoneInput = (val) => {
+                    if (val.startsWith('0')) {
+                        loginForm.phone = val.substring(1);
+                        ElMessage({
+                            message: '國際格式無需輸入首位 0',
+                            type: 'info',
+                            duration: 1500
+                        });
+                    }
+                };
+
                 const posts = ref([
                     {
                         id: 1,
                         author: '系統管理員',
-                        avatarUrl: '', 
-                        content: '歡迎來到 Social Platform！這裡是一個 SPA (單頁應用) 的 UI 預覽。目前您看到的是「訪客視角」，請嘗試點擊右上角登入來體驗完整功能。',
-                        timestamp: new Date(Date.now() - 3600000), // 1小時前
+                        content: '歡迎來到 Social Platform！現在登入 Modal 已加入國碼選擇功能，並會自動過濾手機首位的 0，符合國際撥號格式。',
+                        timestamp: new Date(Date.now() - 3600000),
                         comments: [
-                            { id: 101, author: '路人A', content: '介面看起來很清爽！' },
-                            { id: 102, author: '路人B', content: '測試一下留言功能。' }
+                            { id: 101, author: '開發者', content: '更新了國碼下拉選單，預設為 +886。' }
                         ],
-                        tempComment: ''
-                    },
-                    {
-                        id: 2,
-                        author: '測試人員',
-                        avatarUrl: '',
-                        content: '這是一篇範例貼文。不需要路由跳轉，所有的互動都在同一個頁面上完成。',
-                        timestamp: new Date(Date.now() - 86400000), // 1天前
-                        comments: [],
                         tempComment: ''
                     }
                 ]);
 
-                // --- 方法 Methods ---
-
                 const openLoginModal = () => {
                     loginForm.phone = '';
                     loginForm.password = '';
+                    loginForm.region = '+886';
                     loginVisible.value = true;
                 };
 
                 const handleLogin = () => {
                     if(!loginForm.phone || !loginForm.password) {
-                        ElMessage.warning('請輸入手機與密碼');
+                        ElMessage.warning('請輸入完整的登入資訊');
                         return;
                     }
                     
                     isLoginLoading.value = true;
-
-                    // 模擬 API 請求延遲
                     setTimeout(() => {
                         isLoggedIn.value = true;
                         currentUser.value = {
-                            name: 'User_' + loginForm.phone.slice(-4), // 假裝用手機末四碼當名字
+                            name: `User(${loginForm.region})${loginForm.phone.slice(-3)}`,
                             id: 'u_' + Date.now()
                         };
                         isLoginLoading.value = false;
@@ -383,7 +388,7 @@
                         
                         ElNotification({
                             title: '登入成功',
-                            message: `歡迎回來，${currentUser.value.name}！現在您可以發文了。`,
+                            message: `歡迎回來，${currentUser.value.name}！`,
                             type: 'success',
                         });
                     }, 800);
@@ -397,18 +402,14 @@
 
                 const submitPost = () => {
                     if(!newPostContent.value.trim()) return;
-
                     const newPost = {
                         id: Date.now(),
                         author: currentUser.value.name,
-                        avatarUrl: '',
                         content: newPostContent.value,
                         timestamp: new Date(),
                         comments: [],
                         tempComment: ''
                     };
-
-                    // 新貼文插在最前面
                     posts.value.unshift(newPost);
                     newPostContent.value = '';
                     ElMessage.success('貼文發佈成功！');
@@ -416,19 +417,15 @@
 
                 const submitComment = (post) => {
                     if(!post.tempComment || !post.tempComment.trim()) return;
-
-                    const newComment = {
+                    post.comments.push({
                         id: Date.now(),
                         author: currentUser.value.name,
                         content: post.tempComment
-                    };
-
-                    post.comments.push(newComment);
+                    });
                     post.tempComment = '';
                     ElMessage.success('留言已送出');
                 };
 
-                // 工具：簡單的時間格式化
                 const formatTime = (date) => {
                     return new Date(date).toLocaleString('zh-TW', {
                         month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
@@ -447,7 +444,7 @@
                     currentUser,
                     newPostContent,
                     posts,
-                    // methods
+                    handlePhoneInput,
                     openLoginModal,
                     handleLogin,
                     logout,
@@ -459,7 +456,6 @@
             }
         });
 
-        // 註冊所有 Icons
         for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
             app.component(key, component)
         }
