@@ -46,8 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useGetPosts } from '../api/generated/@tanstack/vue-query.gen';
+import { ref, computed, watch } from 'vue';
+import { listPostsOptions } from '../api/generated/@tanstack/vue-query.gen';
+import { useQuery } from '@tanstack/vue-query';
 import { useMeQuery } from '../queries/me';
 import PostCard from '../components/PostCard.vue';
 import CreatePostForm from '../components/CreatePostForm.vue';
@@ -61,12 +62,15 @@ const limit = 10;
 const currentPage = ref(1);
 const offset = computed(() => (currentPage.value - 1) * limit);
 
-const { data, isLoading, error, refetch } = useGetPosts({
+// Create computed query options that update when offset changes
+const queryOptions = computed(() => listPostsOptions({
   query: {
     limit,
-    offset,
+    offset: offset.value,
   },
-});
+}));
+
+const { data, isLoading, error, refetch } = useQuery(queryOptions);
 
 const posts = computed(() => data.value?.data?.posts ?? []);
 const total = computed(() => data.value?.data?.total ?? 0);

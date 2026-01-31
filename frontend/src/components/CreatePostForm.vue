@@ -51,7 +51,7 @@
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
-import { postPosts } from '../api/generated/sdk.gen';
+import { createPost } from '../api/generated/sdk.gen';
 
 const queryClient = useQueryClient();
 
@@ -91,7 +91,7 @@ async function handleSubmit() {
   isLoading.value = true;
 
   try {
-    await postPosts({
+    await createPost({
       body: {
         content: content.value,
         image: imageUrl.value || undefined,

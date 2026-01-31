@@ -96,7 +96,7 @@
 import { ref, reactive, watch } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
-import { postAuthLogin, postAuthRegister } from '../api/generated/sdk.gen';
+import { login, register } from '../api/generated/sdk.gen';
 import { saveSession } from '../auth/session';
 import { invalidateMeQuery } from '../queries/me';
 import type { LoginResponse } from '../api/generated/types.gen';
@@ -191,7 +191,7 @@ async function handleSubmit() {
 
     if (isLogin.value) {
       // Login
-      const response = await postAuthLogin({
+      const response = await login({
         body: {
           phoneE164,
           password: form.password,
@@ -202,7 +202,7 @@ async function handleSubmit() {
       handleLoginSuccess(data);
     } else {
       // Register
-      const response = await postAuthRegister({
+      const response = await register({
         body: {
           phoneE164,
           userName: form.name,

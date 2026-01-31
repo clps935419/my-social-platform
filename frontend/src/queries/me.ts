@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { getMe } from '../api/generated/sdk.gen';
+import { getProfile } from '../api/generated/sdk.gen';
 import type { UserProfile } from '../api/generated/types.gen';
 import { getAccessToken, clearSession } from '../auth/session';
 
@@ -23,7 +23,7 @@ export function useMeQuery() {
       }
 
       try {
-        const response = await getMe();
+        const response = await getProfile();
         return response.data as UserProfile;
       } catch (error) {
         // If 401, clear session

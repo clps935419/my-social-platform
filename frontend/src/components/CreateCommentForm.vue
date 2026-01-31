@@ -24,7 +24,7 @@
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
-import { postPostsPostIdComments } from '../api/generated/sdk.gen';
+import { createComment } from '../api/generated/sdk.gen';
 
 const props = defineProps<{
   postId: string;
@@ -52,7 +52,7 @@ async function handleSubmit() {
   isLoading.value = true;
 
   try {
-    await postPostsPostIdComments({
+    await createComment({
       path: { postId: props.postId },
       body: {
         content: content.value,

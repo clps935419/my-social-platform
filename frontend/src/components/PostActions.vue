@@ -64,7 +64,7 @@
 import { ref, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
-import { patchPostsPostId, deletePostsPostId } from '../api/generated/sdk.gen';
+import { updatePost, deletePost } from '../api/generated/sdk.gen';
 import { useMeQuery } from '../queries/me';
 
 const props = defineProps<{
@@ -111,7 +111,7 @@ async function handleUpdate() {
   isUpdating.value = true;
 
   try {
-    await patchPostsPostId({
+    await updatePost({
       path: { postId: props.postId },
       body: {
         content: editForm.content,
@@ -143,7 +143,7 @@ async function handleDelete() {
       confirmButtonClass: 'el-button--danger',
     });
 
-    await deletePostsPostId({
+    await deletePost({
       path: { postId: props.postId },
     });
 

@@ -51,7 +51,8 @@
 import { computed } from 'vue';
 import { formatRelativeTime } from '../utils/datetime';
 import { useMeQuery } from '../queries/me';
-import { useGetPostsPostIdComments } from '../api/generated/@tanstack/vue-query.gen';
+import { listCommentsOptions } from '../api/generated/@tanstack/vue-query.gen';
+import { useQuery } from '@tanstack/vue-query';
 import type { Post } from '../api/generated/types.gen';
 import PostActions from './PostActions.vue';
 import CommentsSection from './CommentsSection.vue';
@@ -71,13 +72,15 @@ defineEmits<{
 const {
   data: commentsData,
   isLoading: isLoadingComments,
-} = useGetPostsPostIdComments({
-  path: { postId: props.post.postId },
-  query: {
-    limit: 20,
-    offset: 0,
-  },
-});
+} = useQuery(
+  listCommentsOptions({
+    path: { postId: props.post.postId },
+    query: {
+      limit: 20,
+      offset: 0,
+    },
+  })
+);
 
 const comments = computed(() => commentsData.value?.data?.comments ?? []);
 const commentsTotal = computed(() => commentsData.value?.data?.total ?? 0);

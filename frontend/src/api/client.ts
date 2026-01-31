@@ -1,7 +1,7 @@
 import { client as heyClient } from './generated/client.gen';
-import { postAuthRefresh } from './generated/sdk.gen';
+import { refresh } from './generated/sdk.gen';
 import { getAccessToken, getRefreshToken, saveSession, clearSession } from '../auth/session';
-import type { RefreshResponse } from './generated/types.gen';
+import type { RefreshResponse2 } from './generated/types.gen';
 
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
@@ -17,10 +17,10 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 
   try {
-    const response = await postAuthRefresh({
+    const response = await refresh({
       body: { refreshToken },
     });
-    const data = response.data as RefreshResponse;
+    const data = response.data as RefreshResponse2;
 
     // Save new tokens
     saveSession({
