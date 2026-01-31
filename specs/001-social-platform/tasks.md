@@ -42,13 +42,15 @@ description: "Task list for feature implementation"
 - [X] T074 [P] 建立前端 TypeScript 開發設定（Vite + TS；`@` 路徑別名；`.vue` 型別宣告）於 `frontend/tsconfig.json`, `frontend/tsconfig.node.json`, `frontend/vite.config.ts`, `frontend/src/env.d.ts`
 - [X] T008 建立環境變數樣板（DB/app secrets）於 `.env.example`
 - [X] T063 建立 Makefile 指令（build/up/down/logs/ps/clean 等；統一呼叫 docker compose）於 `Makefile`
-- [ ] T082 建立 production 用 `make production` 一鍵啟動（只需 Docker；不需本機 Java/Node）於 `Makefile`, `README.md`
+- [X] T082 建立 production 用 `make production` 一鍵啟動（只需 Docker；不需本機 Java/Node）於 `Makefile`, `README.md`
   - 策略：**提交 `frontend/dist`**（避免需要 Node/npm 才能看到前端畫面）
   - `make production` 行為：啟動 nginx/app/db 並對外提供 `http://localhost/` 與 `http://localhost/api/health`
-- [ ] T083 建立後端 production Dockerfile（jar build + JRE runtime）與對應 compose（避免 dev volume mount）於 `backend/Dockerfile.prod`, `docker-compose.prod.yml`, `reports/DEPLOYMENT_INSTRUCTIONS.md`
+  - 實作：新增 `make production` 與 `make production-frontend` 指令；前端 dist 已提交並驗證可正常顯示
+- [X] T083 建立後端 production Dockerfile（jar build + JRE runtime）與對應 compose（避免 dev volume mount）於 `backend/Dockerfile.prod`, `docker-compose.prod.yml`, `reports/DEPLOYMENT_INSTRUCTIONS.md`
 	- 容器啟動方式：`java -jar ...`（不可用 `mvn spring-boot:run`）
 	- compose prod：不得包含 `./backend/src` 這類 dev source volume mount、不得依賴 maven-cache；保留 `/api` base path 與現行 nginx 反代行為
 	- 驗收：全新 clone 後執行 `make production` 能直接瀏覽前端並打到後端 API
+	- 實作：已建立 `backend/Dockerfile.prod` (JRE runtime)、`docker-compose.prod.yml` (無 dev volume mount)、更新 `DEPLOYMENT_INSTRUCTIONS.md`
 
 ---
 
