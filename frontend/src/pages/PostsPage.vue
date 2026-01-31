@@ -46,15 +46,12 @@
         @login-required="showAuthDialog = true"
       />
 
-      <!-- Pagination -->
-      <div v-if="total > limit" class="pagination-wrap">
-        <el-pagination
-          v-model:current-page="currentPage"
-          :page-size="limit"
-          :total="total"
-          layout="prev, pager, next"
-          @current-change="handlePageChange"
-        />
+      <div ref="loadMoreRef" class="load-more">
+        <el-icon v-if="isFetchingNextPage" class="is-loading" size="20">
+          <Loading />
+        </el-icon>
+        <span v-else-if="hasNextPage" class="load-more-text">載入更多...</span>
+        <span v-else class="load-more-text">沒有更多貼文</span>
       </div>
     </div>
 
@@ -64,9 +61,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { listPostsOptions } from '../api/generated/@tanstack/vue-query.gen';
-import { useQuery } from '@tanstack/vue-query';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { listPostsInfiniteOptions } from '../api/generated/@tanstack/vue-query.gen';
+import { useInfiniteQuery } from '@tanstack/vue-query';
 import { useMeQuery } from '../queries/me';
 import PostCard from '../components/PostCard.vue';
 import CreatePostForm from '../components/CreatePostForm.vue';
@@ -76,31 +73,35 @@ const { data: currentUser } = useMeQuery();
 
 const showAuthDialog = ref(false);
 
-const limit = 10;
-const currentPage = ref(1);
-const offset = computed(() => (currentPage.value - 1) * limit);
+const limit = 5;
 const sortOrder = ref<'newest' | 'oldest'>('newest');
 const mineOnly = ref(false);
+const loadMoreRef = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
 
-// Create computed query options that update when offset changes
-const queryOptions = computed(() =>
-  listPostsOptions({
+const queryOptions = computed(() => ({
+  ...listPostsInfiniteOptions({
     query: {
       limit,
-      offset: offset.value,
       sort: sortOrder.value,
       mine: mineOnly.value,
     },
-  })
-);
+  }),
+  initialPageParam: 0,
+  getNextPageParam: (lastPage, allPages) => {
+    const total = lastPage.total ?? 0;
+    const loaded = allPages.reduce((sum, page) => sum + (page.items?.length ?? 0), 0);
+    return loaded < total ? loaded : undefined;
+  },
+}));
 
-const { data, isLoading, error, refetch } = useQuery(queryOptions);
+const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  useInfiniteQuery(queryOptions);
 
-const posts = computed(() => data.value?.items ?? []);
-const total = computed(() => data.value?.total ?? 0);
+const posts = computed(() => data.value?.pages?.flatMap((page) => page.items ?? []) ?? []);
 
 watch([sortOrder, mineOnly], () => {
-  currentPage.value = 1;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 watch(currentUser, (user) => {
@@ -109,14 +110,35 @@ watch(currentUser, (user) => {
   }
 });
 
-function handlePageChange(page: number) {
-  currentPage.value = page;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
 function toggleMineOnly() {
   mineOnly.value = !mineOnly.value;
 }
+
+onMounted(() => {
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry?.isIntersecting && hasNextPage.value && !isFetchingNextPage.value) {
+        fetchNextPage();
+      }
+    },
+    { rootMargin: '200px' }
+  );
+
+  if (loadMoreRef.value) {
+    observer.value.observe(loadMoreRef.value);
+  }
+});
+
+watch(loadMoreRef, (el, prev) => {
+  if (!observer.value) return;
+  if (prev) observer.value.unobserve(prev);
+  if (el) observer.value.observe(el);
+});
+
+onBeforeUnmount(() => {
+  observer.value?.disconnect();
+});
 </script>
 
 <style scoped>
@@ -169,9 +191,19 @@ function toggleMineOnly() {
   margin-top: 12px;
 }
 
-.pagination-wrap {
-  text-align: center;
-  margin-top: 24px;
+.load-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 0 24px;
+  color: #909399;
+  font-size: 13px;
+}
+
+.load-more-text {
+  color: #909399;
 }
 
 </style>
