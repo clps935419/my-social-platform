@@ -16,26 +16,25 @@
         <el-button
           size="small"
           :type="mineOnly ? 'primary' : 'default'"
-          :disabled="!currentUser"
-          @click="mineOnly = !mineOnly"
+          @click="toggleMineOnly"
         >
           只看我
         </el-button>
       </div>
     </div>
 
-    <div v-if="isLoading" style="text-align: center; padding: 40px">
+    <div v-if="isLoading" class="status-block">
       <el-icon class="is-loading" size="32"><Loading /></el-icon>
-      <p style="color: #909399; margin-top: 16px">載入中...</p>
+      <p class="status-text">載入中...</p>
     </div>
 
-    <div v-else-if="error" style="text-align: center; padding: 40px">
+    <div v-else-if="error" class="status-block">
       <el-icon size="32" color="#f56c6c"><CircleClose /></el-icon>
-      <p style="color: #f56c6c; margin-top: 16px">載入失敗: {{ error.message }}</p>
-      <el-button @click="refetch" style="margin-top: 12px">重試</el-button>
+      <p class="status-text status-error">載入失敗: {{ error.message }}</p>
+      <el-button class="status-retry" @click="refetch">重試</el-button>
     </div>
 
-    <div v-else-if="posts && posts.length === 0" style="text-align: center; padding: 40px">
+    <div v-else-if="posts && posts.length === 0" class="status-block">
       <el-empty description="目前沒有任何貼文" />
     </div>
 
@@ -48,7 +47,7 @@
       />
 
       <!-- Pagination -->
-      <div v-if="total > limit" style="text-align: center; margin-top: 24px">
+      <div v-if="total > limit" class="pagination-wrap">
         <el-pagination
           v-model:current-page="currentPage"
           :page-size="limit"
@@ -112,6 +111,10 @@ function handlePageChange(page: number) {
   currentPage.value = page;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function toggleMineOnly() {
+  mineOnly.value = !mineOnly.value;
+}
 </script>
 
 <style scoped>
@@ -144,6 +147,29 @@ function handlePageChange(page: number) {
   padding: 6px 14px;
   height: 28px;
   line-height: 16px;
+}
+
+.status-block {
+  text-align: center;
+  padding: 40px;
+}
+
+.status-text {
+  color: #909399;
+  margin-top: 16px;
+}
+
+.status-error {
+  color: #f56c6c;
+}
+
+.status-retry {
+  margin-top: 12px;
+}
+
+.pagination-wrap {
+  text-align: center;
+  margin-top: 24px;
 }
 
 </style>

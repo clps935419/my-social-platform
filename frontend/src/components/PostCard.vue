@@ -1,5 +1,5 @@
 <template>
-  <el-card class="post-card" body-style="padding: 20px; position: relative;" shadow="hover">
+  <el-card class="post-card" shadow="hover">
     <!-- Post Actions (for author only) -->
     <PostActions
       v-if="currentUser && currentUser.userId === post.author?.userId"
@@ -10,7 +10,7 @@
     />
 
     <div class="post-header">
-      <el-avatar :size="40" style="background: #e6a23c">
+      <el-avatar :size="40" class="author-avatar">
         {{ post.author?.userName?.charAt(0) || '?' }}
       </el-avatar>
       <div class="post-meta">
@@ -26,12 +26,11 @@
       :src="post.image"
       fit="cover"
       class="post-image"
-      style="width: 100%; max-height: 400px; border-radius: 8px; margin-top: 12px;"
     />
 
     <div class="post-actions">
       <el-divider content-position="left">
-        <span style="font-size: 12px; color: #909399">留言區 ({{ commentsTotal }})</span>
+        <span class="comments-label">留言區 ({{ commentsTotal }})</span>
       </el-divider>
     </div>
 
@@ -94,6 +93,11 @@ const commentsTotal = computed(() => commentsData.value?.total ?? 0);
   transition: all 0.3s;
 }
 
+.post-card :deep(.el-card__body) {
+  padding: 20px;
+  position: relative;
+}
+
 .post-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -102,6 +106,10 @@ const commentsTotal = computed(() => commentsData.value?.total ?? 0);
   display: flex;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.author-avatar {
+  background: #e6a23c;
 }
 
 .post-meta {
@@ -128,6 +136,18 @@ const commentsTotal = computed(() => commentsData.value?.total ?? 0);
   color: #303133;
   white-space: pre-wrap;
   margin-bottom: 16px;
+}
+
+.post-image {
+  width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.comments-label {
+  font-size: 12px;
+  color: #909399;
 }
 
 .guest-notice {

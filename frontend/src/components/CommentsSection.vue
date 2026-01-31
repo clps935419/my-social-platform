@@ -1,6 +1,6 @@
 <template>
   <div class="comments-section">
-    <div v-if="isLoading" style="text-align: center; padding: 10px">
+    <div v-if="isLoading" class="comments-loading">
       <el-icon class="is-loading"><Loading /></el-icon>
     </div>
     <div v-else-if="comments.length > 0">
@@ -34,6 +34,11 @@ defineProps<{
   padding: 16px;
   border-radius: 8px;
   margin-top: 16px;
+}
+
+.comments-loading {
+  text-align: center;
+  padding: 10px;
 }
 
 .comment-item {

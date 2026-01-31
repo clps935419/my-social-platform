@@ -3,7 +3,7 @@
     v-model="visible"
     :title="isLogin ? '會員登入' : '會員註冊'"
     width="90%"
-    style="max-width: 420px"
+    class="auth-dialog"
     align-center
     destroy-on-close
     @close="handleClose"
@@ -26,7 +26,7 @@
             <el-select
               v-model="form.region"
               placeholder="國碼"
-              style="width: 100px"
+              class="region-select"
             >
               <el-option label="+886 (台灣)" value="+886" />
               <el-option label="+852 (香港)" value="+852" />
@@ -69,22 +69,22 @@
     </el-form>
 
     <template #footer>
-      <div style="display: flex; flex-direction: column; gap: 12px">
-        <div style="display: flex; gap: 8px">
-          <el-button @click="handleClose" style="flex: 1">取消</el-button>
+      <div class="auth-footer">
+        <div class="auth-footer-actions">
+          <el-button @click="handleClose" class="auth-footer-button">取消</el-button>
           <el-button
             type="primary"
             @click="handleSubmit"
             :loading="isLoading"
-            style="flex: 1"
+            class="auth-footer-button"
           >
             {{ isLogin ? '登入' : '註冊' }}
           </el-button>
         </div>
-        <div style="display:flex; align-items: center; justify-content: center; font-size: 14px; color: #909399">
+        <div class="auth-footer-switch">
           <span v-if="isLogin">還沒有帳號？</span>
           <span v-else>已經有帳號？</span>
-          <el-link type="primary" @click="toggleMode" style="margin-left: 4px">
+          <el-link type="primary" @click="toggleMode" class="auth-footer-link">
             {{ isLogin ? '立即註冊' : '立即登入' }}
           </el-link>
         </div>
@@ -277,3 +277,40 @@ function handleClose() {
   isLogin.value = true;
 }
 </script>
+
+<style scoped>
+.auth-dialog {
+  max-width: 420px;
+}
+
+.region-select {
+  width: 100px;
+}
+
+.auth-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.auth-footer-button {
+  flex: 1;
+}
+
+.auth-footer-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #909399;
+}
+
+.auth-footer-link {
+  margin-left: 4px;
+}
+</style>

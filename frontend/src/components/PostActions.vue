@@ -11,8 +11,8 @@
             編輯
           </el-dropdown-item>
           <el-dropdown-item command="delete" divided>
-            <el-icon style="color: #f56c6c"><Delete /></el-icon>
-            <span style="color: #f56c6c">刪除</span>
+            <el-icon class="danger-text"><Delete /></el-icon>
+            <span class="danger-text">刪除</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </template>
@@ -23,7 +23,7 @@
       v-model="showEditDialog"
       title="編輯貼文"
       width="90%"
-      style="max-width: 500px"
+      class="edit-dialog"
       destroy-on-close
     >
       <el-form @submit.prevent="handleUpdate">
@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
 import { updatePost, deletePost } from '../api/generated/sdk.gen';
@@ -82,7 +82,7 @@ const emit = defineEmits<{
 const queryClient = useQueryClient();
 const { data: currentUser } = useMeQuery();
 
-const isAuthor = ref(currentUser.value?.userId === props.authorUserId);
+const isAuthor = computed(() => currentUser.value?.userId === props.authorUserId);
 
 const showEditDialog = ref(false);
 const isUpdating = ref(false);
@@ -179,5 +179,13 @@ async function handleDelete() {
   position: absolute;
   top: 12px;
   right: 12px;
+}
+
+.danger-text {
+  color: #f56c6c;
+}
+
+.edit-dialog {
+  max-width: 500px;
 }
 </style>

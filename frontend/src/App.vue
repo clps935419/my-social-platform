@@ -14,11 +14,11 @@
 
         <template v-else>
           <el-dropdown trigger="click">
-            <span class="el-dropdown-link" style="cursor: pointer; display: flex; align-items: center">
-              <el-avatar :size="32" style="background: #409eff; margin-right: 8px">
+            <span class="el-dropdown-link">
+              <el-avatar :size="32" class="user-avatar">
                 {{ currentUser.userName.charAt(0) }}
               </el-avatar>
-              <span style="font-weight: 500">{{ currentUser.userName }}</span>
+              <span class="user-name">{{ currentUser.userName }}</span>
               <el-icon class="el-icon--right"><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
@@ -151,7 +151,17 @@ body {
 }
 
 .el-dropdown-link {
+  cursor: pointer;
   display: flex;
   align-items: center;
+}
+
+.user-avatar {
+  background: #409eff;
+  margin-right: 8px;
+}
+
+.user-name {
+  font-weight: 500;
 }
 </style>
