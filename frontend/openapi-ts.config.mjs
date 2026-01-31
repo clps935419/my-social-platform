@@ -5,5 +5,11 @@ export default {
     format: "prettier",
     lint: "biome",
   },
-  plugins: ["@tanstack/vue-query", "@hey-api/client-axios"],
+  plugins: [
+    "@tanstack/vue-query",
+    {
+      name: "@hey-api/client-axios",
+      runtimeConfigPath: "./src/api/hey-api.runtime.ts",
+    },
+  ],
 };

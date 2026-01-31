@@ -4,8 +4,11 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import App from "./App.vue";
+import { configureApiClient } from "./api/client";
 
 const app = createApp(App);
+
+configureApiClient();
 
 // Setup TanStack Query (Vue Query)
 app.use(VueQueryPlugin, {
