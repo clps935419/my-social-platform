@@ -97,9 +97,9 @@ import { ref, reactive, watch } from 'vue';
 import { ElMessage, ElNotification } from 'element-plus';
 import { useQueryClient } from '@tanstack/vue-query';
 import { login, register } from '../api/generated/sdk.gen';
+import type { LoginRequest, RegisterRequest, AuthResponse } from '../api/generated/types.gen';
 import { saveSession } from '../auth/session';
 import { invalidateMeQuery } from '../queries/me';
-import type { LoginResponse } from '../api/generated/types.gen';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -187,30 +187,34 @@ async function handleSubmit() {
   isLoading.value = true;
 
   try {
-    const phoneE164 = `${form.region}${form.phone}`;
+    const phoneNumber = `${form.region}${form.phone}`;
 
     if (isLogin.value) {
       // Login
+      const loginPayload: LoginRequest = {
+        phoneNumber,
+        password: form.password,
+      };
+      
       const response = await login({
-        body: {
-          phoneE164,
-          password: form.password,
-        },
+        body: loginPayload,
       });
 
-      const data = response.data as LoginResponse;
+      const data = response.data as AuthResponse;
       handleLoginSuccess(data);
     } else {
       // Register
+      const registerPayload: RegisterRequest = {
+        phoneNumber,
+        userName: form.name,
+        password: form.password,
+      };
+      
       const response = await register({
-        body: {
-          phoneE164,
-          userName: form.name,
-          password: form.password,
-        },
+        body: registerPayload,
       });
 
-      const data = response.data as LoginResponse;
+      const data = response.data as AuthResponse;
       handleLoginSuccess(data);
     }
   } catch (error: any) {
@@ -221,11 +225,11 @@ async function handleSubmit() {
   }
 }
 
-function handleLoginSuccess(data: LoginResponse) {
+function handleLoginSuccess(data: AuthResponse) {
   // Save session
   saveSession({
-    accessToken: data.accessToken,
-    refreshToken: data.refreshToken,
+    accessToken: data.accessToken!,
+    refreshToken: data.refreshToken!,
     user: data.user,
   });
 
@@ -238,7 +242,7 @@ function handleLoginSuccess(data: LoginResponse) {
   // Show success message
   ElNotification({
     title: isLogin.value ? '登入成功' : '註冊成功',
-    message: `歡迎${isLogin.value ? '回來' : ''}，${data.user.userName}！`,
+    message: `歡迎${isLogin.value ? '回來' : ''}，${data.user?.userName}！`,
     type: 'success',
   });
 

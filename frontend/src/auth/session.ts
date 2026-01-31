@@ -1,4 +1,4 @@
-import type { UserProfile } from '../api/generated/types.gen';
+import type { UserInfo } from '../api/generated/types.gen';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -7,7 +7,7 @@ const USER_KEY = 'user';
 export interface SessionState {
   accessToken: string | null;
   refreshToken: string | null;
-  user: UserProfile | null;
+  user: UserInfo | null;
 }
 
 /**
@@ -18,7 +18,7 @@ export function loadSession(): SessionState {
     return {
       accessToken: localStorage.getItem(ACCESS_TOKEN_KEY),
       refreshToken: localStorage.getItem(REFRESH_TOKEN_KEY),
-      user: JSON.parse(localStorage.getItem(USER_KEY) || 'null') as UserProfile | null,
+      user: JSON.parse(localStorage.getItem(USER_KEY) || 'null') as UserInfo | null,
     };
   } catch {
     return { accessToken: null, refreshToken: null, user: null };
@@ -90,10 +90,10 @@ export function getRefreshToken(): string | null {
 /**
  * Get current user
  */
-export function getCurrentUser(): UserProfile | null {
+export function getCurrentUser(): UserInfo | null {
   try {
     const userStr = localStorage.getItem(USER_KEY);
-    return userStr ? (JSON.parse(userStr) as UserProfile) : null;
+    return userStr ? (JSON.parse(userStr) as UserInfo) : null;
   } catch {
     return null;
   }
