@@ -70,16 +70,16 @@ defineEmits<{
 
 // Load comments for this post
 const { data: commentsData, isLoading: isLoadingComments } = useQuery(
-      computed(() => ({
-        ...listCommentsOptions({
-          path: { postId: props.post.postId ?? '' },
-          query: {
-            limit: 20,
-            offset: 0,
-          },
-        }),
-        enabled: Boolean(props.post.postId),
-      }))
+  computed(() => ({
+    ...listCommentsOptions({
+      path: { postId: props.post.postId ?? '' },
+      query: {
+        limit: 20,
+        offset: 0,
+      },
+    }),
+    enabled: Boolean(props.post.postId),
+  }))
 );
 
 const comments = computed(() => commentsData.value?.items ?? []);
