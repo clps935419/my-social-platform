@@ -72,7 +72,7 @@ const queryOptions = computed(() => listPostsOptions({
 
 const { data, isLoading, error, refetch } = useQuery(queryOptions);
 
-const posts = computed(() => data.value?.data?.posts ?? []);
+const posts = computed(() => data.value?.data?.items ?? []);
 const total = computed(() => data.value?.data?.total ?? 0);
 
 function handlePageChange(page: number) {

@@ -122,8 +122,8 @@ async function handleUpdate() {
     ElMessage.success('貼文更新成功');
     showEditDialog.value = false;
 
-    // Invalidate queries
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    // Invalidate queries using correct query key
+    queryClient.invalidateQueries({ queryKey: ['listPosts'] });
 
     emit('updated');
   } catch (error: any) {
@@ -149,8 +149,8 @@ async function handleDelete() {
 
     ElMessage.success('貼文已刪除');
 
-    // Invalidate queries
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    // Invalidate queries using correct query key
+    queryClient.invalidateQueries({ queryKey: ['listPosts'] });
 
     emit('deleted');
   } catch (error: any) {

@@ -64,9 +64,9 @@ async function handleSubmit() {
     // Clear input
     content.value = '';
 
-    // Invalidate comments query
+    // Invalidate comments query using correct query key
     queryClient.invalidateQueries({
-      queryKey: ['posts', props.postId, 'comments'],
+      queryKey: ['listComments'],
     });
 
     emit('comment-created');

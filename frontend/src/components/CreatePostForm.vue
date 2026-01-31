@@ -104,8 +104,8 @@ async function handleSubmit() {
     content.value = '';
     imageUrl.value = '';
 
-    // Invalidate posts query to refresh list
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    // Invalidate posts query to refresh list using correct query key
+    queryClient.invalidateQueries({ queryKey: ['listPosts'] });
 
     emit('post-created');
   } catch (error: any) {

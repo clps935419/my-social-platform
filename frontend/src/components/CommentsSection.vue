@@ -5,7 +5,7 @@
     </div>
     <div v-else-if="comments.length > 0">
       <div v-for="comment in comments" :key="comment.commentId" class="comment-item">
-        <span class="comment-user">{{ comment.authorUserName }}:</span>
+        <span class="comment-user">{{ comment.author?.userName || 'Unknown' }}:</span>
         <span>{{ comment.content }}</span>
       </div>
     </div>

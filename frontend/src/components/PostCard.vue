@@ -2,28 +2,28 @@
   <el-card class="post-card" body-style="padding: 20px; position: relative;" shadow="hover">
     <!-- Post Actions (for author only) -->
     <PostActions
-      v-if="currentUser && currentUser.userId === post.authorUserId"
-      :post-id="post.postId"
-      :author-user-id="post.authorUserId"
-      :current-content="post.content"
-      :current-image-url="post.imageUrl"
+      v-if="currentUser && currentUser.userId === post.author?.userId"
+      :post-id="post.postId!"
+      :author-user-id="post.author!.userId!"
+      :current-content="post.content!"
+      :current-image-url="post.image"
     />
 
     <div class="post-header">
       <el-avatar :size="40" style="background: #e6a23c">
-        {{ post.authorUserName.charAt(0) }}
+        {{ post.author?.userName?.charAt(0) || '?' }}
       </el-avatar>
       <div class="post-meta">
-        <span class="author-name">{{ post.authorUserName }}</span>
-        <span class="post-time">{{ formatRelativeTime(post.createdAt) }}</span>
+        <span class="author-name">{{ post.author?.userName || 'Unknown' }}</span>
+        <span class="post-time">{{ formatRelativeTime(post.createdAt!) }}</span>
       </div>
     </div>
 
     <div class="post-body">{{ post.content }}</div>
 
     <el-image
-      v-if="post.imageUrl"
-      :src="post.imageUrl"
+      v-if="post.image"
+      :src="post.image"
       fit="cover"
       class="post-image"
       style="width: 100%; max-height: 400px; border-radius: 8px; margin-top: 12px;"
@@ -38,7 +38,7 @@
     <!-- Comments Section - inline like prototype -->
     <CommentsSection :comments="comments" :is-loading="isLoadingComments">
       <template #comment-input>
-        <CreateCommentForm v-if="currentUser" :post-id="post.postId" />
+        <CreateCommentForm v-if="currentUser" :post-id="post.postId!" />
         <div v-else class="guest-notice">
           <el-link type="primary" @click="$emit('login-required')">登入</el-link> 後即可參與討論
         </div>
@@ -74,7 +74,7 @@ const {
   isLoading: isLoadingComments,
 } = useQuery(
   listCommentsOptions({
-    path: { postId: props.post.postId },
+    path: { postId: props.post.postId! },
     query: {
       limit: 20,
       offset: 0,
@@ -82,7 +82,7 @@ const {
   })
 );
 
-const comments = computed(() => commentsData.value?.data?.comments ?? []);
+const comments = computed(() => commentsData.value?.data?.items ?? []);
 const commentsTotal = computed(() => commentsData.value?.data?.total ?? 0);
 </script>
 
