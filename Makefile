@@ -25,10 +25,8 @@ volumes-reset: ## Recreate volumes and start services
 	docker compose down -v
 	docker compose up -d
 
-clean: ## Stop and remove all containers, networks, and volumes
-	docker compose down -v
-	rm -rf frontend/node_modules frontend/dist
-	rm -rf backend/target
+clean: ## Stop and remove all containers
+	docker compose down
 
 production-down: ## Stop production deployment
 	docker compose -f docker-compose.prod.yml down

@@ -28,7 +28,7 @@ make logs            # 查看日誌
 make production      # 只用 Docker 的正式環境部署
 make production-down # 停止正式環境
 make volumes-reset   # 清除 volume 並重建
-make clean           # 清除容器、volume、前後端建置產物
+make clean           # 移除容器
 ```
 
 ## 🏗️ 架構說明
