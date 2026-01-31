@@ -1,366 +1,124 @@
 # Social Media Platform
 
-A simple social media platform with phone number authentication, posts, and comments. Built with Spring Boot, Vue 3, and PostgreSQL.
+簡易社群平台：手機號碼註冊/登入、貼文、留言
 
-## 🏗️ Architecture
+**Tech Stack**: Spring Boot 3 + Vue 3 + PostgreSQL 16 + Nginx
+
+## 🚀 Quick Start (只需 Docker)
+
+```bash
+# 1. 複製環境變數
+cp .env.example .env
+
+# 2. 啟動所有服務
+make up
+
+# 3. 開啟瀏覽器
+# Frontend: http://localhost/
+# API Health: http://localhost/api/health
+# Swagger UI: http://localhost:8080/api/swagger-ui/index.html
+```
+
+**首次啟動需等待 3-5 分鐘** (Maven 下載依賴)
+
+## 📋 常用指令
+
+```bash
+make up          # 啟動服務
+make down        # 停止服務
+make logs        # 查看日誌
+make ps          # 查看狀態
+make health      # 健康檢查
+make clean       # 清除所有資料重新開始
+```
+
+## 🏗️ 架構說明
 
 - **Frontend**: Vue 3 + Vite + TypeScript + TanStack Query
 - **Backend**: Spring Boot 3 (Java 17) + JdbcTemplate + Stored Procedures
 - **Database**: PostgreSQL 16
-- **Web Server**: Nginx (reverse proxy + static files)
+- **Web Server**: Nginx (反向代理 + 靜態檔案)
 - **Deployment**: Docker Compose
 
-## 🚀 Quick Start
+## 📁 專案結構
 
-### Prerequisites
-
-- Docker & Docker Compose
-- (Optional) Node.js 20+ for local frontend development
-- (Optional) Java 17+ & Maven for local backend development
-
-### Development Mode
-
-#### 1. Start All Services
-
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Start services (this will take a few minutes on first run)
-make up
-
-# Or use docker compose directly
-docker compose up -d --build
+```
+├── DB/                  # 資料庫初始化腳本 (schema, tables, indexes, seed)
+├── backend/             # Spring Boot 後端 (REST API, DAO, Security)
+├── frontend/            # Vue 3 前端 (pages, components, API client)
+├── nginx/               # Nginx 設定
+└── docker-compose.yml   # Docker Compose 設定
 ```
 
-#### 2. Check Service Health
+## 🔒 安全特性
 
-```bash
-make health
-```
+- **SP-First**: 所有資料庫操作透過 Stored Procedures (防 SQL Injection)
+- **JWT 認證**: 無狀態 access token + refresh token rotation
+- **密碼加密**: Salt + Hash (PBKDF2/BCrypt)
+- **Rate Limiting**: 防暴力破解
+- **XSS 防護**: 前端安全渲染
 
-#### 3. Access the Application
+## 🛠️ 開發模式
 
-- **Frontend**: http://localhost/
-- **Backend API**: http://localhost/api/health
-- **Swagger UI** (for developers): http://localhost:8080/api/swagger-ui/index.html
-  - Access directly via backend port (bypasses nginx)
-  - Not exposed through reverse proxy
-- **Database**: localhost:5432
-
-### Production Mode (T082)
-
-**One-command deployment** - requires only Docker, no Node.js or Maven needed:
-
-```bash
-# Copy environment template (if not already done)
-cp .env.example .env
-
-# Start production services
-make production
-```
-
-**What's different in production:**
-- ✅ Uses pre-built frontend (`frontend/dist` is committed)
-- ✅ Backend is compiled to JAR (multi-stage build)
-- ✅ Faster startup (no dependency downloads)
-- ✅ No source code volume mounts
-- ✅ Runs with `java -jar` (not `mvn spring-boot:run`)
-
-**Access Points** (same as development):
-- **Frontend**: http://localhost/
-- **Backend API**: http://localhost/api/health
-
-**Stop production:**
-```bash
-make production-down
-```
-
-## 🛠️ Development
-
-### Make Commands
-
-#### Development Commands
-```bash
-make help        # Show all available commands
-make up          # Start all services
-make down        # Stop all services
-make restart     # Restart all services
-make logs        # Show logs (follow mode)
-make ps          # Show service status
-make clean       # Stop and remove everything
-make health      # Check service health
-```
-
-#### Production Commands
-```bash
-make production       # Start production deployment (one-command, Docker only)
-make production-down  # Stop production deployment
-```
-
-### Local Development
-
-#### Frontend
+### 前端開發
 ```bash
 cd frontend
 npm install
-npm run dev      # Dev server on http://localhost:5173
-npm run build    # Build for production
-npm run gen:sdk  # Generate API SDK from backend OpenAPI spec
+npm run dev      # 開發伺服器 http://localhost:5173
+npm run build    # 建置正式版
 ```
 
-##### TypeScript Conventions
-
-- Frontend uses TypeScript only (`.ts` and `<script lang="ts">` in `.vue`).
-- Path alias: `@` maps to `frontend/src/`.
-- Prefer absolute imports with `@/` and avoid deep relative imports (e.g., `../../`).
-
-##### SDK Generation Workflow
-
-**Automatic SDK Generation**:
-The frontend uses [@hey-api/openapi-ts](https://github.com/hey-api/openapi-ts) to generate TypeScript API client from backend's OpenAPI specification.
-
-**How to regenerate SDK**:
-```bash
-# 1. Ensure backend is running (API docs must be accessible)
-docker compose up -d app
-
-# 2. Generate SDK
-cd frontend
-npm run gen:sdk
-```
-
-**Important Notes**:
-- **Generated code location**: `frontend/src/api/generated/`
-- **DO NOT manually edit generated files** - they will be overwritten on next generation
-- **Generated code is NOT committed to git** - it's treated as build artifact
-- **Regenerate SDK whenever backend API changes** - keep frontend in sync
-- SDK uses `@tanstack/vue-query` for data fetching and `axios` for HTTP client
-
-#### Backend
+### 後端開發
 ```bash
 cd backend
-mvn spring-boot:run  # Requires Java 17+
+mvn spring-boot:run  # 需要 Java 17+
 ```
 
-### Hot Reload
+### 熱重載
+- **Frontend**: 修改 `frontend/src/` 自動重新編譯
+- **Backend**: 修改 `backend/src/` 自動重啟 (spring-boot-devtools)
 
-Both frontend and backend support hot reload in Docker:
-- **Frontend**: Changes to `frontend/src/` trigger rebuild
-- **Backend**: Changes to `backend/src/` trigger auto-restart (via spring-boot-devtools)
+## 📝 實作進度
 
-## 📁 Project Structure
+**已完成**: Phase 1 & 2 (專案建置與基礎架構) ✅
 
-```
-├── DB/                  # Database initialization scripts
-│   ├── 001_schema.sql   # Schema and extensions
-│   ├── 010_tables.sql   # Core tables
-│   ├── 020_indexes.sql  # Indexes and constraints
-│   └── 030_seed.sql     # Seed data
-├── backend/             # Spring Boot application
-│   ├── src/main/java/
-│   │   └── com/example/platform/
-│   │       ├── api/              # REST controllers
-│   │       ├── service/          # Business logic
-│   │       ├── dao/              # Data access (SP calls)
-│   │       ├── security/         # Auth & JWT
-│   │       └── common/           # Error handling
-│   └── pom.xml
-├── frontend/            # Vue 3 application
-│   ├── src/
-│   │   ├── pages/      # Vue pages
-│   │   ├── components/ # Vue components
-│   │   └── api/        # API client
-│   └── package.json
-├── nginx/              # Nginx configuration
-│   └── default.conf
-└── docker-compose.yml
-```
+詳細進度請參考 [IMPLEMENTATION_SUMMARY.md](./reports/IMPLEMENTATION_SUMMARY.md)
 
-## 🔒 Security Features
+## 🔧 環境變數設定
 
-- **SP-First Architecture**: All database access via stored procedures (no SQL injection)
-- **Parameterized Queries**: Only SimpleJdbcCall with named parameters
-- **No Stack Traces**: Error responses never leak internal details
-- **E.164 Phone Validation**: Consistent phone number format
-- **JWT Authentication**: Stateless access tokens + refresh token rotation
-- **Password Hashing**: Salt + hash (PBKDF2/BCrypt)
-- **Rate Limiting**: Protection against brute force attacks
-- **XSS Prevention**: No unsafe rendering in frontend
-
-## 📋 Features (Roadmap)
-
-### ✅ Phase 1 & 2: Foundation (Completed)
-- [x] Project setup with Docker Compose
-- [x] Database schema with stored procedures
-- [x] Backend error handling framework
-- [x] Frontend API client with TanStack Query
-- [x] Health check endpoint
-
-### 🚧 Phase 3: User Story 1 - Browse Posts (Next)
-- [ ] List posts (newest first)
-- [ ] View post comments
-- [ ] Pagination support
-
-### 📅 Phase 4: User Story 2 - Authentication
-- [ ] Phone number registration
-- [ ] Login with JWT
-- [ ] Refresh token rotation
-- [ ] Get user profile
-
-### 📅 Phase 5: User Story 3 - Post Management
-- [ ] Create post
-- [ ] Update post (author only)
-- [ ] Soft delete post (author only)
-
-### 📅 Phase 6: User Story 4 - Comments
-- [ ] Add comment to post
-- [ ] View comments (all users)
-
-## 🧪 Testing
-
-### API Testing
-
-Use the provided acceptance scripts:
+編輯 `.env` 檔案 (預設值已可直接使用):
 ```bash
-# Coming in Phase 3
-./docs/us1-acceptance.http
-```
-
-Or use curl:
-```bash
-# Health check
-curl http://localhost/api/health
-
-# List posts (after US1 implementation)
-curl http://localhost/api/posts?limit=10&offset=0
-```
-
-### Database Testing
-
-Connect to PostgreSQL:
-```bash
-docker compose exec db psql -U postgres -d social_platform
-```
-
-## 📝 Implementation Status
-
-See [IMPLEMENTATION_SUMMARY.md](./reports/IMPLEMENTATION_SUMMARY.md) for detailed progress.
-
-**Completed Tasks**: 20/20 (Phase 1 & 2)
-- Phase 1 (Setup): 9/9 ✅
-- Phase 2 (Foundation): 11/11 ✅
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Edit `.env` to customize:
-```bash
-# Database
 POSTGRES_DB=social_platform
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
-POSTGRES_PORT=5432
-
-# JWT
 JWT_SECRET=your-secret-here-min-32-chars
-JWT_EXPIRATION_SECONDS=3600
-
-# Refresh Token
-REFRESH_TOKEN_EXPIRATION_SECONDS=2592000
-
-# Nginx
-NGINX_PORT=80
 ```
 
-## 📚 Documentation
+## 🐛 常見問題
 
-- [Implementation Summary](./reports/IMPLEMENTATION_SUMMARY.md) - Detailed implementation report
-- [Deployment Instructions](./reports/DEPLOYMENT_INSTRUCTIONS.md) - Complete deployment guide
-- [Phase 1 & 2 Status](./reports/PHASE1_PHASE2_STATUS.md) - Detailed task completion status
-- [Specification](./specs/001-social-platform/spec.md) - Feature requirements
-- [Technical Plan](./specs/001-social-platform/plan.md) - Architecture decisions
-- [Data Model](./specs/001-social-platform/data-model.md) - Database schema
-- [API Contract](./specs/001-social-platform/contracts/openapi.yaml) - OpenAPI spec
-
-## 🐛 Troubleshooting
-
-### Cannot connect to API through nginx (502/503 errors)
-
-The reverse proxy requires the backend service to be running. Check:
-
+### 服務無法啟動
 ```bash
-# 1. Verify all services are running
-docker compose ps
-
-# 2. Check backend logs
-docker compose logs app
-
-# 3. Test backend directly (bypassing nginx)
-curl http://localhost:8080/api/health
-
-# 4. Check nginx logs
-docker compose logs nginx
-
-# 5. Restart services in order
-docker compose restart app
-docker compose restart nginx
-```
-
-**Common causes:**
-- Backend is still starting (Maven downloading dependencies on first run - can take 3-5 minutes)
-- Backend failed to start (check logs for errors)
-- Network connectivity issues between containers
-
-### Services won't start
-```bash
-# Check logs
-make logs
-
-# Check status
-make ps
-
-# Clean restart
-make clean
+make logs        # 查看錯誤日誌
+make ps          # 檢查服務狀態
+make clean       # 清除後重新啟動
 make up
 ```
 
-### Database connection issues
+### 首次啟動很慢
+正常現象，Maven 需下載依賴 (3-5 分鐘)
 ```bash
-# Wait for database to be ready
-docker compose exec db pg_isready -U postgres
-
-# Check database logs
-docker compose logs db
+make logs -f app  # 監控後端啟動進度
 ```
 
-### Port conflicts
+### Port 衝突
+編輯 `.env` 修改 port:
 ```bash
-# Change ports in .env
-POSTGRES_PORT=5433
 NGINX_PORT=8000
+POSTGRES_PORT=5433
 ```
 
-### Backend takes long time to start
+## 📚 詳細文件
 
-On first run, Maven needs to download all dependencies (Spring Boot, PostgreSQL driver, etc.). This is normal and can take 3-5 minutes depending on your internet connection.
-
-```bash
-# Monitor backend startup
-docker compose logs -f app
-
-# You should see Maven downloading dependencies, then Spring Boot starting
-```
-
-## 📄 License
-
-This is a demo project for educational purposes.
-
-## 🤝 Contributing
-
-This is a reference implementation. Feel free to use it as a starting point for your own projects.
-
-## 📧 Contact
-
-For questions or feedback, please refer to the project documentation in the `specs/` directory.
+- [Implementation Summary](./reports/IMPLEMENTATION_SUMMARY.md) - 實作報告
+- [Deployment Instructions](./reports/DEPLOYMENT_INSTRUCTIONS.md) - 部署說明
+- [API Contract](./specs/001-social-platform/contracts/openapi.yaml) - API 規格
