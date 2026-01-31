@@ -1,5 +1,10 @@
 <template>
   <div class="posts-page">
+    <!-- Create Post Form (only when logged in) -->
+    <transition name="el-fade-in">
+      <CreatePostForm v-if="currentUser" />
+    </transition>
+
     <div v-if="isLoading" style="text-align: center; padding: 40px">
       <el-icon class="is-loading" size="32"><Loading /></el-icon>
       <p style="color: #909399; margin-top: 16px">載入中...</p>
@@ -41,9 +46,13 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useGetPosts } from '../api/generated/@tanstack/vue-query.gen';
+import { useMeQuery } from '../queries/me';
 import PostCard from '../components/PostCard.vue';
+import CreatePostForm from '../components/CreatePostForm.vue';
 
 const router = useRouter();
+
+const { data: currentUser } = useMeQuery();
 
 const limit = 10;
 const currentPage = ref(1);

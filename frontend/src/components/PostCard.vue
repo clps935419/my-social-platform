@@ -1,5 +1,14 @@
 <template>
-  <el-card class="post-card" body-style="padding: 20px;" shadow="hover">
+  <el-card class="post-card" body-style="padding: 20px; position: relative;" shadow="hover">
+    <!-- Post Actions (for author only) -->
+    <PostActions
+      v-if="currentUser && currentUser.userId === post.authorUserId"
+      :post-id="post.postId"
+      :author-user-id="post.authorUserId"
+      :current-content="post.content"
+      :current-image-url="post.imageUrl"
+    />
+
     <div class="post-header">
       <el-avatar :size="40" style="background: #e6a23c">
         {{ post.authorUserName.charAt(0) }}
@@ -36,7 +45,11 @@
 
 <script setup lang="ts">
 import { formatRelativeTime } from '../utils/datetime';
+import { useMeQuery } from '../queries/me';
 import type { Post } from '../api/generated/types.gen';
+import PostActions from './PostActions.vue';
+
+const { data: currentUser } = useMeQuery();
 
 defineProps<{
   post: Post;

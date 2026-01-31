@@ -20,7 +20,17 @@
 
     <div v-else-if="post">
       <!-- Post Content -->
-      <el-card class="post-detail-card" body-style="padding: 24px;">
+      <el-card class="post-detail-card" body-style="padding: 24px; position: relative;">
+        <!-- Post Actions (for author only) -->
+        <PostActions
+          v-if="currentUser && currentUser.userId === post.authorUserId"
+          :post-id="post.postId"
+          :author-user-id="post.authorUserId"
+          :current-content="post.content"
+          :current-image-url="post.imageUrl"
+          @deleted="goBack"
+        />
+
         <div class="post-header">
           <el-avatar :size="48" style="background: #e6a23c">
             {{ post.authorUserName.charAt(0) }}
@@ -62,7 +72,14 @@
           <el-button @click="refetchComments" size="small" style="margin-top: 8px">重試</el-button>
         </div>
 
-        <CommentsSection v-else :comments="comments" />
+        <CommentsSection v-else :comments="comments">
+          <template #comment-input>
+            <CreateCommentForm v-if="currentUser" :post-id="postId" />
+            <div v-else class="guest-notice">
+              <el-link type="primary" @click="showAuthPrompt">登入</el-link> 後即可參與討論
+            </div>
+          </template>
+        </CommentsSection>
 
         <!-- Pagination for comments -->
         <div v-if="commentsTotal > commentsLimit" style="text-align: center; margin-top: 16px">
@@ -83,9 +100,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import { useGetPostsPostIdComments } from '../api/generated/@tanstack/vue-query.gen';
 import { getPostsPostId } from '../api/generated/sdk.gen';
+import { useMeQuery } from '../queries/me';
 import CommentsSection from '../components/CommentsSection.vue';
+import CreateCommentForm from '../components/CreateCommentForm.vue';
+import PostActions from '../components/PostActions.vue';
 import { formatDateTime } from '../utils/datetime';
 import type { Post } from '../api/generated/types.gen';
 
@@ -94,6 +115,8 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+
+const { data: currentUser } = useMeQuery();
 
 // Load post (using direct call since we need single post, not list)
 const post = ref<Post | null>(null);
@@ -151,6 +174,10 @@ function handleCommentsPageChange(page: number) {
 function goBack() {
   router.push({ name: 'posts' });
 }
+
+function showAuthPrompt() {
+  ElMessage.info('請先登入以參與討論');
+}
 </script>
 
 <style scoped>
@@ -197,5 +224,14 @@ function goBack() {
 
 .comments-card {
   border-radius: 8px;
+}
+
+.guest-notice {
+  text-align: center;
+  color: #909399;
+  font-size: 13px;
+  padding: 8px 0;
+  background: #f4f4f5;
+  border-radius: 4px;
 }
 </style>

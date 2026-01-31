@@ -12,11 +12,7 @@
     </div>
 
     <div class="comment-input-area">
-      <slot name="comment-input">
-        <div class="guest-notice">
-          <el-link type="primary" @click="$emit('login-required')">登入</el-link> 後即可參與討論
-        </div>
-      </slot>
+      <slot name="comment-input" />
     </div>
   </div>
 </template>
@@ -27,10 +23,6 @@ import type { Comment } from '../api/generated/types.gen';
 
 defineProps<{
   comments: Comment[];
-}>();
-
-defineEmits<{
-  'login-required': [];
 }>();
 </script>
 
