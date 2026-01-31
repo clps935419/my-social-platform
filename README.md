@@ -22,6 +22,10 @@ make production
 
 ## 📋 常用指令
 
+**指令執行環境**
+- Windows：請用 PowerShell
+- macOS/Linux：請用 Bash/Zsh
+
 ```bash
 make dev             # 啟動服務 (需要時自動 build)
 make logs            # 查看日誌
