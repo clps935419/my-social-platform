@@ -4,11 +4,15 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import App from "./App.vue";
+import router from "./router";
 import { configureApiClient } from "./api/client";
 
 const app = createApp(App);
 
 configureApiClient();
+
+// Setup Vue Router
+app.use(router);
 
 // Setup TanStack Query (Vue Query)
 app.use(VueQueryPlugin, {

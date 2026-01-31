@@ -1,75 +1,81 @@
 <template>
-  <el-container class="app-shell">
-    <el-header class="app-header">
-      <div class="app-brand">
-        <el-icon><ChatDotRound /></el-icon>
-        <span>Social Platform</span>
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand" @click="goHome">SocialApp</div>
+      <div class="user-area">
+        <el-button type="primary" plain>
+          <el-icon class="mr-2"><User /></el-icon> 登入
+        </el-button>
       </div>
-      <el-space>
-        <el-button type="primary" plain>登入</el-button>
-        <el-button>註冊</el-button>
-      </el-space>
-    </el-header>
-    <el-main class="app-main">
-      <el-container class="content-container">
-        <el-card class="welcome-card" shadow="never">
-          <template #header>
-            <div class="card-title">
-              <el-icon><Notebook /></el-icon>
-              <span>Welcome</span>
-            </div>
-          </template>
-          <el-text>歡迎來到簡易社群平台。接下來會逐步補上貼文與留言功能。</el-text>
-        </el-card>
-      </el-container>
-    </el-main>
-  </el-container>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-view />
+    </main>
+  </div>
 </template>
 
-<script>
-export default {
-  name: 'App',
-};
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+function goHome() {
+  router.push({ name: 'posts' });
+}
 </script>
 
 <style>
-.app-shell {
-  min-height: 100vh;
-  background: #f5f7fa;
+body {
+  margin: 0;
+  background-color: #f2f3f5;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
 }
 
-.app-header {
+.app-layout {
+  max-width: 700px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #ebeef5;
+  padding: 0 20px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #ffffff;
-  border-bottom: 1px solid #ebeef5;
 }
 
-.app-brand {
-  display: inline-flex;
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: #409eff;
+  cursor: pointer;
+}
+
+.user-area {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
+  gap: 10px;
 }
 
-.app-main {
-  padding: 24px;
+.main-content {
+  flex: 1;
 }
 
-.content-container {
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-.welcome-card {
-  border-radius: 12px;
-}
-
-.card-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
+.mr-2 {
+  margin-right: 8px;
 }
 </style>
