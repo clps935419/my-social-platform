@@ -25,7 +25,7 @@
         v-for="post in posts"
         :key="post.postId"
         :post="post"
-        @view-detail="goToPostDetail"
+        @login-required="showAuthDialog = true"
       />
 
       <!-- Pagination -->
@@ -39,20 +39,23 @@
         />
       </div>
     </div>
+
+    <!-- Auth Dialog -->
+    <AuthDialog v-model="showAuthDialog" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useGetPosts } from '../api/generated/@tanstack/vue-query.gen';
 import { useMeQuery } from '../queries/me';
 import PostCard from '../components/PostCard.vue';
 import CreatePostForm from '../components/CreatePostForm.vue';
-
-const router = useRouter();
+import AuthDialog from '../components/AuthDialog.vue';
 
 const { data: currentUser } = useMeQuery();
+
+const showAuthDialog = ref(false);
 
 const limit = 10;
 const currentPage = ref(1);
@@ -71,10 +74,6 @@ const total = computed(() => data.value?.data?.total ?? 0);
 function handlePageChange(page: number) {
   currentPage.value = page;
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function goToPostDetail(postId: string) {
-  router.push({ name: 'post-detail', params: { postId } });
 }
 </script>
 

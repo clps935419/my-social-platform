@@ -31,33 +31,56 @@
 
     <div class="post-actions">
       <el-divider content-position="left">
-        <span style="font-size: 12px; color: #909399">留言區</span>
+        <span style="font-size: 12px; color: #909399">留言區 ({{ commentsTotal }})</span>
       </el-divider>
     </div>
 
-    <div class="post-footer">
-      <el-button text @click="$emit('view-detail', post.postId)">
-        查看完整內容與留言
-      </el-button>
-    </div>
+    <!-- Comments Section - inline like prototype -->
+    <CommentsSection :comments="comments" :is-loading="isLoadingComments">
+      <template #comment-input>
+        <CreateCommentForm v-if="currentUser" :post-id="post.postId" />
+        <div v-else class="guest-notice">
+          <el-link type="primary" @click="$emit('login-required')">登入</el-link> 後即可參與討論
+        </div>
+      </template>
+    </CommentsSection>
   </el-card>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { formatRelativeTime } from '../utils/datetime';
 import { useMeQuery } from '../queries/me';
+import { useGetPostsPostIdComments } from '../api/generated/@tanstack/vue-query.gen';
 import type { Post } from '../api/generated/types.gen';
 import PostActions from './PostActions.vue';
+import CommentsSection from './CommentsSection.vue';
+import CreateCommentForm from './CreateCommentForm.vue';
 
 const { data: currentUser } = useMeQuery();
 
-defineProps<{
+const props = defineProps<{
   post: Post;
 }>();
 
 defineEmits<{
-  'view-detail': [postId: string];
+  'login-required': [];
 }>();
+
+// Load comments for this post
+const {
+  data: commentsData,
+  isLoading: isLoadingComments,
+} = useGetPostsPostIdComments({
+  path: { postId: props.post.postId },
+  query: {
+    limit: 20,
+    offset: 0,
+  },
+});
+
+const comments = computed(() => commentsData.value?.data?.comments ?? []);
+const commentsTotal = computed(() => commentsData.value?.data?.total ?? 0);
 </script>
 
 <style scoped>
@@ -103,8 +126,12 @@ defineEmits<{
   margin-bottom: 16px;
 }
 
-.post-footer {
+.guest-notice {
   text-align: center;
-  margin-top: 8px;
+  color: #909399;
+  font-size: 13px;
+  padding: 8px 0;
+  background: #f4f4f5;
+  border-radius: 4px;
 }
 </style>

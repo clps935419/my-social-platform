@@ -1,10 +1,12 @@
 <template>
   <div class="comments-section">
-    <div v-if="comments.length > 0">
+    <div v-if="isLoading" style="text-align: center; padding: 10px">
+      <el-icon class="is-loading"><Loading /></el-icon>
+    </div>
+    <div v-else-if="comments.length > 0">
       <div v-for="comment in comments" :key="comment.commentId" class="comment-item">
         <span class="comment-user">{{ comment.authorUserName }}:</span>
         <span>{{ comment.content }}</span>
-        <span class="comment-time">{{ formatRelativeTime(comment.createdAt) }}</span>
       </div>
     </div>
     <div v-else class="no-comments">
@@ -18,11 +20,11 @@
 </template>
 
 <script setup lang="ts">
-import { formatRelativeTime } from '../utils/datetime';
 import type { Comment } from '../api/generated/types.gen';
 
 defineProps<{
   comments: Comment[];
+  isLoading?: boolean;
 }>();
 </script>
 
@@ -39,9 +41,6 @@ defineProps<{
   font-size: 14px;
   border-bottom: 1px solid #ebeef5;
   padding-bottom: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .comment-item:last-child {
@@ -54,11 +53,6 @@ defineProps<{
   font-weight: bold;
   color: #606266;
   margin-right: 4px;
-}
-
-.comment-time {
-  font-size: 12px;
-  color: #909399;
 }
 
 .no-comments {

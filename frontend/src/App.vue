@@ -65,7 +65,7 @@ onMounted(() => {
 });
 
 function goHome() {
-  router.push({ name: 'posts' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function handleLoginSuccess() {
