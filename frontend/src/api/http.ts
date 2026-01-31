@@ -39,17 +39,17 @@ apiClient.interceptors.response.use(
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
-      
+
       // Handle 401 Unauthorized - could trigger refresh token flow here
       if (status === 401) {
         // TODO: Implement automatic token refresh
         console.error('Unauthorized - please log in again');
       }
-      
+
       // Extract error message from standard ErrorResponse format
       const errorMessage = data?.message || 'An error occurred';
       console.error(`API Error [${status}]:`, errorMessage);
-      
+
       // Re-throw with consistent format
       error.message = errorMessage;
       error.errorCode = data?.errorCode;
@@ -61,7 +61,7 @@ apiClient.interceptors.response.use(
       // Something else happened
       console.error('Error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );
