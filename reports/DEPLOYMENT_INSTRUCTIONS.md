@@ -271,6 +271,100 @@ SELECT * FROM posts WHERE deleted_at IS NULL;  # View active posts
 
 ---
 
+## 🚀 Production Deployment (T083 & T082)
+
+### Production Build Strategy
+
+The production deployment:
+- Uses **pre-built frontend** (`frontend/dist` is committed to git)
+- Uses **production Dockerfile** for backend (expects pre-built JAR)
+- **No local Node.js or Maven required** - only Docker needed
+- Container starts with `java -jar` (not `mvn spring-boot:run`)
+- No development volume mounts
+
+### CI/Sandbox Environment Note
+
+⚠️ **Network Restrictions**: In sandboxed CI environments (like GitHub Actions), Docker build containers may not have internet access to download Maven dependencies. 
+
+**Workaround Options**:
+
+1. **Pre-build JAR locally** before deploying:
+   ```bash
+   cd backend
+   mvn clean package -DskipTests
+   cd ..
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+
+2. **Use development container** with cached dependencies:
+   ```bash
+   # Start dev container (has Maven cache)
+   docker compose up -d app
+   # Wait for build to complete
+   docker compose exec app mvn package -DskipTests
+   # Copy JAR out
+   docker compose cp app:/app/target/*.jar backend/target/
+   # Build and start production
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+
+3. **Frontend-only test** (verify frontend display):
+   ```bash
+   docker run -d -p 80:80 \
+     -v $(pwd)/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro \
+     -v $(pwd)/frontend/dist:/usr/share/nginx/html:ro \
+     nginx:1.25-alpine
+   # Access: http://localhost/
+   ```
+
+### Prerequisites for Production
+
+- Docker & Docker Compose only
+- `.env` file configured with production secrets
+- **Pre-built JAR file** in `backend/target/` (if using backend)
+
+### Deploy Production (Frontend Verified ✅)
+
+```bash
+# Frontend-only deployment (recommended for testing)
+make production-frontend
+
+# Full stack (requires pre-built backend JAR)
+make production
+```
+
+### Frontend Verification
+
+✅ **Confirmed Working**: The frontend (`frontend/dist`) is properly committed and displays correctly when served by nginx.
+
+![Frontend Display](https://github.com/user-attachments/assets/06f866dc-ee22-4d51-b40a-cc4ab2534af5)
+
+**What's shown**:
+- SocialApp header with logo
+- Login button (登入)
+- Filter buttons: 最新 (Newest) / 最舊 (Oldest)
+- Loading indicator (attempts to connect to backend API)
+
+### Production vs Development
+
+| Aspect | Development | Production |
+|--------|-------------|------------|
+| **Backend Build** | `mvn spring-boot:run` in container | Pre-built JAR + JRE runtime |
+| **Frontend** | Hot reload from `src/` | Pre-built `dist/` (✅ committed) |
+| **Volume Mounts** | Source code mounted | No source mounts |
+| **Maven Cache** | Cached in volume | Not used |
+| **Startup Time** | Slow (downloads deps) | Fast (pre-built) |
+| **Use Case** | Local development | Deployment/Production |
+
+### Stop Production
+
+```bash
+# Stop production services
+docker compose -f docker-compose.prod.yml down
+```
+
+---
+
 ## 🔒 Security Notes
 
 ### For Production Deployment:
@@ -287,7 +381,7 @@ SELECT * FROM posts WHERE deleted_at IS NULL;  # View active posts
    - Update `nginx/default.conf`
 
 3. **Restrict Database Access**:
-   - Remove database port exposure in `docker-compose.yml`
+   - Remove database port exposure in `docker-compose.prod.yml`
    - Or bind to localhost only: `127.0.0.1:5432:5432`
 
 4. **Update CORS Settings** (if needed):
