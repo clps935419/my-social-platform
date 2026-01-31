@@ -101,10 +101,10 @@ description: "Task list for feature implementation"
 - [x] T024 [P] [US1] 建立留言 DAO（呼叫 sp_comment_list_by_post）於 `backend/src/main/java/com/example/platform/dao/CommentDao.java`
 - [x] T025 [US1] 實作 GET /posts（含 limit/offset 驗證；回 PostListResponse）於 `backend/src/main/java/com/example/platform/api/PostController.java`
 - [x] T026 [US1] 實作 GET /posts/{postId}/comments（deleted post → 404）於 `backend/src/main/java/com/example/platform/api/CommentController.java`
-- [ ] T027 [P] [US1] 建立前端貼文列表頁（使用 Hey API 產碼：`generated/@tanstack/vue-query.gen.ts` 的 query options；禁止手寫 URL；顯示作者/內容/時間）於 `frontend/src/pages/PostsPage.vue`
-- [ ] T028 [P] [US1] 建立前端貼文詳情頁（使用 Hey API 產碼：留言列表 query options；禁止手寫 URL；支持分頁）於 `frontend/src/pages/PostDetailPage.vue`
-- [ ] T075 [P] [US1] 建立前端路由與頁面骨架（`/`=貼文列表、`/posts/:postId`=貼文詳情；共用 Header/Main 版型）於 `frontend/src/router.ts`, `frontend/src/App.vue`
-- [ ] T076 [P] [US1] 建立前端共用 UI 元件以貼近 `ui-prototype.html`（PostCard/CommentsSection/時間格式化 helper；純文字渲染禁止 v-html）於 `frontend/src/components/PostCard.vue`, `frontend/src/components/CommentsSection.vue`, `frontend/src/utils/datetime.ts`
+- [x] T027 [P] [US1] 建立前端貼文列表頁（使用 Hey API 產碼：`generated/@tanstack/vue-query.gen.ts` 的 query options；禁止手寫 URL；顯示作者/內容/時間）於 `frontend/src/pages/PostsPage.vue`
+- [x] T028 [P] [US1] 建立前端貼文詳情頁（使用 Hey API 產碼：留言列表 query options；禁止手寫 URL；支持分頁）於 `frontend/src/pages/PostDetailPage.vue`
+- [x] T075 [P] [US1] 建立前端路由與頁面骨架（`/`=貼文列表、`/posts/:postId`=貼文詳情；共用 Header/Main 版型）於 `frontend/src/router.ts`, `frontend/src/App.vue`
+- [x] T076 [P] [US1] 建立前端共用 UI 元件以貼近 `ui-prototype.html`（PostCard/CommentsSection/時間格式化 helper；純文字渲染禁止 v-html）於 `frontend/src/components/PostCard.vue`, `frontend/src/components/CommentsSection.vue`, `frontend/src/utils/datetime.ts`
 - [x] T029 [US1] 建立 US1 可重跑驗收腳本（.http 或 curl；含 limit/offset 範例與 400 範例）於 `docs/us1-acceptance.http`
 
 **Checkpoint**：US1 腳本可重跑且通過；貼文列表不含已軟刪除貼文。
@@ -133,13 +133,13 @@ description: "Task list for feature implementation"
 - [x] T040 [US2] 實作 POST /auth/login（回 accessToken+refreshToken+user；401/429）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
 - [x] T041 [US2] 實作 POST /auth/refresh（rotation：舊 refresh 立刻失效；401）於 `backend/src/main/java/com/example/platform/api/AuthController.java`
 - [x] T042 [US2] 實作 GET /me（需登入；回 UserProfile）於 `backend/src/main/java/com/example/platform/api/MeController.java`
-- [ ] T043 [P] [US2] 建立前端註冊/登入頁（使用 Hey API 產碼 mutations；禁止手寫 URL；保存 token；表單驗證採 `vee-validate` + `zod`）於 `frontend/src/pages/AuthPage.vue`
-- [ ] T044 [US2] 建立前端 token 儲存與自動 refresh（最小：401 時觸發 refresh 再重試一次；與 Hey API `@hey-api/client-axios` 共用同一套機制）於 `frontend/src/api/auth.ts`
-- [ ] T077 [P] [US2] 依 `ui-prototype.html` 實作登入 Modal flow（Header 登入按鈕→Dialog；成功後顯示使用者下拉/登出；表單驗證採 `vee-validate` + `zod`）於 `frontend/src/components/AuthDialog.vue`, `frontend/src/components/AppHeader.vue`, `frontend/src/App.vue`
-- [ ] T078 [P] [US2] 強化 HTTP client（Hey API `@hey-api/client-axios`）：access token 自動帶入、401 single-flight refresh、原請求僅重試一次；refresh 失敗則清除 session 並顯示提示於 `frontend/src/api/client.ts`（必要時可由 `frontend/src/api/http.ts` 提供共用 axios instance）
-- [ ] T079 [P] [US2] 建立前端 session 狀態管理（載入/保存 accessToken、refreshToken、user；提供 login/logout；頁面 reload 後可恢復登入狀態）於 `frontend/src/auth/session.ts`
-- [ ] T080 [P] [US2] TanStack Query 串接 auth：提供 `useMeQuery`、登入/登出後 invalidate/clear query cache；避免 401 時 query 無限重試於 `frontend/src/queries/me.ts`, `frontend/src/main.ts`
-- [ ] T081 [P] [US2] 設定 Hey API 產碼 client 使用 `/api` baseURL 並與 token/refresh 機制整合（所有產碼呼叫走同一 client；避免硬編 `http://localhost:8080/api`；禁止手寫 URL；**禁止手改 generated 檔**）於 `frontend/src/api/client.ts`, `frontend/src/api/hey-api.runtime.ts`, `frontend/openapi-ts.config.mjs`
+- [x] T043 [P] [US2] 建立前端註冊/登入頁（使用 Hey API 產碼 mutations；禁止手寫 URL；保存 token；表單驗證採 `vee-validate` + `zod`）於 `frontend/src/pages/AuthPage.vue`
+- [x] T044 [US2] 建立前端 token 儲存與自動 refresh（最小：401 時觸發 refresh 再重試一次；與 Hey API `@hey-api/client-axios` 共用同一套機制）於 `frontend/src/api/auth.ts`
+- [x] T077 [P] [US2] 依 `ui-prototype.html` 實作登入 Modal flow（Header 登入按鈕→Dialog；成功後顯示使用者下拉/登出；表單驗證採 `vee-validate` + `zod`）於 `frontend/src/components/AuthDialog.vue`, `frontend/src/components/AppHeader.vue`, `frontend/src/App.vue`
+- [x] T078 [P] [US2] 強化 HTTP client（Hey API `@hey-api/client-axios`）：access token 自動帶入、401 single-flight refresh、原請求僅重試一次；refresh 失敗則清除 session 並顯示提示於 `frontend/src/api/client.ts`（必要時可由 `frontend/src/api/http.ts` 提供共用 axios instance）
+- [x] T079 [P] [US2] 建立前端 session 狀態管理（載入/保存 accessToken、refreshToken、user；提供 login/logout；頁面 reload 後可恢復登入狀態）於 `frontend/src/auth/session.ts`
+- [x] T080 [P] [US2] TanStack Query 串接 auth：提供 `useMeQuery`、登入/登出後 invalidate/clear query cache；避免 401 時 query 無限重試於 `frontend/src/queries/me.ts`, `frontend/src/main.ts`
+- [x] T081 [P] [US2] 設定 Hey API 產碼 client 使用 `/api` baseURL 並與 token/refresh 機制整合（所有產碼呼叫走同一 client；避免硬編 `http://localhost:8080/api`；禁止手寫 URL；**禁止手改 generated 檔**）於 `frontend/src/api/client.ts`, `frontend/src/api/hey-api.runtime.ts`, `frontend/openapi-ts.config.mjs`
 - [x] T045 [US2] 建立 US2 可重跑驗收腳本（含：重複註冊 409、錯誤密碼 401、refresh 舊 token 失效）於 `docs/us2-acceptance.http`
 
 **Checkpoint**：US2 腳本可重跑且通過；對外錯誤不含 stack/SQL。
@@ -199,8 +199,8 @@ description: "Task list for feature implementation"
 	- 行為：成功軟刪除回 204
 	- 重複呼叫：若貼文不存在或已刪除 → 回 404（不做重複刪除）
 	- 403/404 判斷必須依 `sp_post_soft_delete` 回傳 meta（不得自行 SQL 查表）
-- [ ] T052 [P] [US3] 建立前端發文 UI（表單 + 使用 Hey API 產碼 mutation；禁止手寫 URL；表單驗證採 `vee-validate` + `zod`：content 不得全空白、imageUrl（選填）需 http/https 且長度 <= 2048）於 `frontend/src/components/CreatePostForm.vue`
-- [ ] T053 [P] [US3] 建立前端貼文管理 UI（作者可見 edit/delete；使用 Hey API 產碼 mutations；禁止手寫 URL）於 `frontend/src/components/PostActions.vue`
+- [x] T052 [P] [US3] 建立前端發文 UI（表單 + 使用 Hey API 產碼 mutation；禁止手寫 URL；表單驗證採 `vee-validate` + `zod`：content 不得全空白、imageUrl（選填）需 http/https 且長度 <= 2048）於 `frontend/src/components/CreatePostForm.vue`
+- [x] T053 [P] [US3] 建立前端貼文管理 UI（作者可見 edit/delete；使用 Hey API 產碼 mutations；禁止手寫 URL）於 `frontend/src/components/PostActions.vue`
 - [x] T054 [US3] 建立 US3 可重跑驗收腳本（兩帳號驗證 403；刪後列表不顯示）於 `docs/us3-acceptance.http`
 
 **Checkpoint**：US3 腳本可重跑且通過。
@@ -232,7 +232,7 @@ description: "Task list for feature implementation"
 	- `postId` 不存在或貼文已軟刪除：回 404（判斷依 `sp_comment_create`；禁止自行 SQL 查表）
 	- 輸入驗證：`content` 必填且不得全空白
 
-- [ ] T057 [P] [US4] 建立前端新增留言 UI（登入可輸入送出；成功後刷新列表；使用 Hey API 產碼 mutation；禁止手寫 URL；表單驗證採 `vee-validate` + `zod`：content 不得全空白）於 `frontend/src/components/CreateCommentForm.vue`
+- [x] T057 [P] [US4] 建立前端新增留言 UI（登入可輸入送出；成功後刷新列表；使用 Hey API 產碼 mutation；禁止手寫 URL；表單驗證採 `vee-validate` + `zod`：content 不得全空白）於 `frontend/src/components/CreateCommentForm.vue`
 	- XSS 最小規則：留言內容一律以純文字顯示（禁止使用 `v-html`）；使用 Vue 預設插值輸出即可。完整 XSS hardening 見 Phase 7（T060）。
 
 - [x] T058 [US4] 建立 US4 可重跑驗收腳本（含成功案例；未登入 401、deleted post 404）於 `docs/us4-acceptance.http`
@@ -259,10 +259,11 @@ description: "Task list for feature implementation"
 	- 檢查重點：status code（201/204/404/401/403/429）、error response schema（ErrorResponse）、security（bearerAuth 標示）、時間格式（UTC ISO 8601 含 `Z`）。
 	- 若需更新契約：只補齊「已實作且確定正確」的 schema/response，不新增未規劃的 endpoints。
 
-- [ ] T060 強化安全：確保所有輸入輸出不會造成 XSS（前端禁止 v-html；必要時做輸出編碼）於 `frontend/src/components/PostContent.vue`
+- [x] T060 強化安全：確保所有輸入輸出不會造成 XSS（前端禁止 v-html；必要時做輸出編碼）於 `frontend/src/components/PostContent.vue`
 	- 若 `PostContent.vue` 不存在：新增此 component，統一用純文字渲染貼文/留言內容（禁止 `v-html`）。
 	- 套用範圍：貼文列表、貼文詳情、留言列表、以及任何顯示 user-provided content 的地方。
 	- 原則：優先使用 Vue 預設插值（auto-escape）；除非明確需求，否則不引入 HTML sanitizer。
+	- 實作：已在所有 components 使用 Vue 預設插值 {{ }}，禁止 v-html。PostContent.vue 已創建作為統一 XSS 防護範例。
 
 - [x] T061 確認後端不洩漏 stack trace/SQL（包含 DataAccessException/Unhandled exception）於 `backend/src/main/java/com/example/platform/common/GlobalExceptionHandler.java`
 	- 「不洩漏」定義：API response body 不得包含 SQL 字串、driver 訊息、stack trace、package/class/method 詳細資訊。
