@@ -4,9 +4,28 @@
     <header class="header">
       <div class="brand" @click="goHome">SocialApp</div>
       <div class="user-area">
-        <el-button type="primary" plain>
-          <el-icon class="mr-2"><User /></el-icon> 登入
-        </el-button>
+        <template v-if="!currentUser">
+          <el-button type="primary" plain @click="showAuthDialog = true">
+            <el-icon class="mr-2"><User /></el-icon> 登入
+          </el-button>
+        </template>
+
+        <template v-else>
+          <el-dropdown trigger="click">
+            <span class="el-dropdown-link" style="cursor: pointer; display: flex; align-items: center">
+              <el-avatar :size="32" style="background: #409eff; margin-right: 8px">
+                {{ currentUser.userName.charAt(0) }}
+              </el-avatar>
+              <span style="font-weight: 500">{{ currentUser.userName }}</span>
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="handleLogout">登出</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
       </div>
     </header>
 
@@ -14,16 +33,52 @@
     <main class="main-content">
       <router-view />
     </main>
+
+    <!-- Auth Dialog -->
+    <AuthDialog v-model="showAuthDialog" @login-success="handleLoginSuccess" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useQueryClient } from '@tanstack/vue-query';
+import { ElMessage } from 'element-plus';
+import AuthDialog from './components/AuthDialog.vue';
+import { useMeQuery, clearMeQuery } from './queries/me';
+import { clearSession, loadSession } from './auth/session';
 
 const router = useRouter();
+const queryClient = useQueryClient();
+
+const showAuthDialog = ref(false);
+
+// Load user on mount
+const { data: currentUser, refetch: refetchMe } = useMeQuery();
+
+onMounted(() => {
+  // Try to load session from localStorage
+  const session = loadSession();
+  if (session.accessToken) {
+    refetchMe();
+  }
+});
 
 function goHome() {
   router.push({ name: 'posts' });
+}
+
+function handleLoginSuccess() {
+  refetchMe();
+}
+
+function handleLogout() {
+  clearSession();
+  clearMeQuery(queryClient);
+  ElMessage.info('已登出');
+  
+  // Refresh current page
+  router.go(0);
 }
 </script>
 
@@ -77,5 +132,10 @@ body {
 
 .mr-2 {
   margin-right: 8px;
+}
+
+.el-dropdown-link {
+  display: flex;
+  align-items: center;
 }
 </style>
