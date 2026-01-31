@@ -21,7 +21,11 @@ async function refreshAccessToken(): Promise<string | null> {
     const response = await refresh({
       body: { refreshToken },
     });
-    const data = response.data as RefreshResponse2;
+    const data = response.data as RefreshResponse2 | undefined;
+    if (!data?.accessToken || !data?.refreshToken) {
+      clearSession();
+      return null;
+    }
 
     // Save new tokens
     saveSession({

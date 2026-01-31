@@ -242,8 +242,8 @@ async function handleSubmit() {
   }
 }
 
-function handleLoginSuccess(data: AuthResponse) {
-  if (!data.accessToken || !data.refreshToken) {
+function handleLoginSuccess(data: AuthResponse | undefined) {
+  if (!data?.accessToken || !data?.refreshToken) {
     ElMessage.error('登入資訊不完整，請重新登入');
     return;
   }
@@ -301,7 +301,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 .region-select {
-  width: 100px;
+  width: 120px;
 }
 
 .auth-footer {
