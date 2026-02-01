@@ -186,6 +186,32 @@ Authorization: Bearer {{user1Token}}
 
 ---
 
+### Test 13: Edge case - limit=0 (should get 400)
+GET {{baseUrl}}/me/posts?limit=0
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 BAD_REQUEST
+
+---
+
+### Test 14: Edge case - very large offset (beyond total)
+GET {{baseUrl}}/me/posts?limit=10&offset=99999
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK with empty items array
+### Should return: { items: [], total: 3 }
+
+---
+
+### Test 15: Verify soft-deleted posts excluded from /me/posts
+# If user has deleted their own posts, they should not appear in /me/posts
+GET {{baseUrl}}/me/posts
+Authorization: Bearer {{user1Token}}
+
+### Expected: Only non-deleted posts appear
+
+---
+
 ## Notes
 - All /me/posts endpoints REQUIRE authentication
 - Same pagination parameters as GET /posts: limit (1-100, default: 20), offset (default: 0)
