@@ -89,12 +89,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if ("POST".equals(method) && path.endsWith("/auth/refresh")) {
             return true;
         }
-        // GET /posts
-        if ("GET".equals(method) && path.endsWith("/posts")) {
+        // GET /posts (but not /me/posts or other subpaths)
+        // Match exactly /api/posts or /posts with optional query string
+        if ("GET".equals(method) && path.matches(".*/posts(\\?.*)?$") && !path.contains("/me/")) {
             return true;
         }
         // GET /posts/{postId}/comments (matches pattern like /posts/UUID/comments)
-        if ("GET".equals(method) && path.matches(".*/posts/[^/]+/comments")) {
+        if ("GET".equals(method) && path.matches(".*/posts/[^/]+/comments(\\?.*)?$")) {
             return true;
         }
         // GET /health
