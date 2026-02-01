@@ -7,6 +7,47 @@ import axios from 'axios';
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
+const publicEndpointRules = [
+  { method: 'GET', pattern: /^\/posts$/ },
+  { method: 'GET', pattern: /^\/posts\/[^/]+\/comments$/ },
+  { method: 'GET', pattern: /^\/health$/ },
+  { method: 'POST', pattern: /^\/auth\/login$/ },
+  { method: 'POST', pattern: /^\/auth\/register$/ },
+  { method: 'POST', pattern: /^\/auth\/refresh$/ },
+];
+
+const normalizePath = (config: axios.AxiosRequestConfig): string => {
+  const baseURL = config.baseURL ?? '';
+  const url = config.url ?? '';
+  let path = '';
+
+  try {
+    if (url.startsWith('http')) {
+      path = new URL(url).pathname;
+    } else if (baseURL.startsWith('http')) {
+      path = new URL(url, baseURL).pathname;
+    } else {
+      const merged = `${baseURL}${url.startsWith('/') ? '' : '/'}${url}`;
+      path = merged;
+    }
+  } catch {
+    path = url;
+  }
+
+  if (!path.startsWith('/')) path = `/${path}`;
+  if (path.startsWith('/api/')) path = path.slice(4);
+  if (path === '/api') path = '/';
+  const queryIndex = path.indexOf('?');
+  if (queryIndex >= 0) path = path.slice(0, queryIndex);
+  return path;
+};
+
+const isPublicRequest = (config: axios.AxiosRequestConfig): boolean => {
+  const method = (config.method ?? 'get').toUpperCase();
+  const path = normalizePath(config);
+  return publicEndpointRules.some((rule) => rule.method === method && rule.pattern.test(path));
+};
+
 /**
  * Refresh access token using refresh token
  */
@@ -52,8 +93,16 @@ export const configureApiClient = () => {
   // Get the underlying axios instance from the Hey API client
   const axiosInstance = heyClient.instance;
 
-  // Add request interceptor to attach access token
+  // Add request interceptor to attach access token (skip public endpoints)
   axiosInstance.interceptors.request.use((config) => {
+    if (isPublicRequest(config)) {
+      if (config.headers) {
+        delete (config.headers as Record<string, string>).Authorization;
+        delete (config.headers as Record<string, string>).authorization;
+      }
+      return config;
+    }
+
     const token = getAccessToken();
     if (token) {
       config.headers = config.headers || {};
@@ -69,7 +118,7 @@ export const configureApiClient = () => {
       const originalRequest = error.config;
 
       // If 401 and not already retried
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      if (error.response?.status === 401 && !originalRequest._retry && !isPublicRequest(originalRequest)) {
         originalRequest._retry = true;
 
         // Single-flight refresh

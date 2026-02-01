@@ -128,10 +128,34 @@ const form = reactive({
   confirmPassword: '',
 });
 
+const phoneLengthByRegion: Record<string, number> = {
+  '+886': 9,
+  '+852': 8,
+  '+86': 11,
+  '+1': 10,
+};
+
 const rules: FormRules = {
   phone: [
-    { required: true, message: '請輸入手機號碼', trigger: 'blur' },
-    { pattern: /^\d{8,12}$/, message: '請輸入正確手機號碼格式', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        const raw = String(value ?? '');
+        if (!raw) return callback(new Error('請輸入手機號碼'));
+        if (!/^\d+$/.test(raw)) return callback(new Error('手機號碼只能包含數字'));
+
+        const expectedLength = phoneLengthByRegion[form.region];
+        if (expectedLength && raw.length !== expectedLength) {
+          return callback(new Error(`請輸入 ${expectedLength} 位數手機號碼`));
+        }
+
+        if (!expectedLength && (raw.length < 8 || raw.length > 12)) {
+          return callback(new Error('請輸入正確手機號碼格式'));
+        }
+
+        return callback();
+      },
+      trigger: ['blur', 'change'],
+    },
   ],
   name: [
     {
@@ -179,14 +203,23 @@ watch(visible, (val) => {
 });
 
 function handlePhoneInput(val: string) {
-  if (val.startsWith('0')) {
-    form.phone = val.substring(1);
+  const digitsOnly = val.replace(/\D+/g, '');
+  if (digitsOnly !== val) {
+    form.phone = digitsOnly;
+  }
+
+  if (form.region === '+886' && digitsOnly.startsWith('0')) {
+    form.phone = digitsOnly.substring(1);
     ElMessage({
       message: '國際格式無需輸入首位 0',
       type: 'info',
       duration: 1500,
     });
+    formRef.value?.validateField('phone');
+    return;
   }
+
+  formRef.value?.validateField('phone');
 }
 
 function toggleMode() {

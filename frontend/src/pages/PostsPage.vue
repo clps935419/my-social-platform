@@ -62,7 +62,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
-import { listPostsInfiniteOptions } from '../api/generated/@tanstack/vue-query.gen';
+import {
+  getMyPostsInfiniteOptions,
+  listPostsInfiniteOptions,
+} from '../api/generated/@tanstack/vue-query.gen';
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import { useMeQuery } from '../queries/me';
 import PostCard from '../components/PostCard.vue';
@@ -79,14 +82,21 @@ const mineOnly = ref(false);
 const loadMoreRef = ref<HTMLElement | null>(null);
 const observer = ref<IntersectionObserver | null>(null);
 
+const baseOptions = computed(() => {
+  const query = {
+    limit,
+    sort: sortOrder.value,
+  };
+
+  if (mineOnly.value && currentUser.value) {
+    return getMyPostsInfiniteOptions({ query });
+  }
+
+  return listPostsInfiniteOptions({ query });
+});
+
 const queryOptions = computed(() => ({
-  ...listPostsInfiniteOptions({
-    query: {
-      limit,
-      sort: sortOrder.value,
-      mine: mineOnly.value,
-    },
-  }),
+  ...baseOptions.value,
   initialPageParam: 0,
   getNextPageParam: (lastPage, allPages) => {
     const total = lastPage.total ?? 0;
