@@ -29,6 +29,8 @@
 - ✅ Test 6: Invalid offset (negative) - 無效參數 400
 - ✅ Test 10b: Invalid sort value - 無效參數 400
 - ✅ Test 11: Verify soft-deleted posts are excluded
+- ✅ Test 13: Edge case - limit=0 - 邊界測試 400
+- ✅ Test 14: Edge case - very large offset - 邊界測試
 
 #### GET /api/posts/{postId}/comments 測試
 - ✅ Test 7: List comments for a post - 成功
@@ -37,6 +39,8 @@
 - ✅ Test 9: Comments for non-existent post - 不存在 404
 - ✅ Test 10: Comments with invalid post ID format - 無效 postId 400
 - ✅ Test 12: Verify comments on soft-deleted post return 404
+- ✅ Test 15: Edge case - limit=0 - 邊界測試 400
+- ✅ Test 16: Edge case - very large offset - 邊界測試
 
 ## 3. US2（註冊/登入/refresh/me）
 
@@ -117,14 +121,28 @@
 #### GET /posts/{postId}/comments
 - ✅ 已在 `us1-acceptance.http` 覆蓋（Tests 7-12）
 
-## 6. 進階功能（若有開）
+## 6. 進階功能
 
 ### 要求場景
-- GET /posts?mine=true：成功、未登入 401
+- GET /me/posts：成功、未登入 401、分頁、排序
 
-### 實現位置：`test-mine-filter.http`
-- ✅ Step 6 & 7: User gets only their own posts (mine=true) - 成功
-- ✅ Step 8: Try to use mine=true without authentication - 未登入 401
+### 實現位置：`me-posts-acceptance.http` 和 `test-mine-filter.http`
+
+#### GET /me/posts 測試
+- ✅ Test 1: Get all posts for current user - 成功
+- ✅ Test 2-3: Pagination with limit and offset - 分頁
+- ✅ Test 4-5: Sorting (newest/oldest) - 排序
+- ✅ Test 6: User isolation (User2 only sees their posts) - 用戶隔離
+- ✅ Test 7: Access without authentication - 未登入 401
+- ✅ Test 8-11: Invalid parameters (limit, offset, sort) - 參數驗證
+- ✅ Test 12: Detailed pagination verification - 分頁驗證
+- ✅ Test 13: Edge case - limit=0 - 邊界測試 400
+- ✅ Test 14: Edge case - very large offset - 邊界測試
+- ✅ Test 15: Verify soft-deleted posts excluded - 軟刪除驗證
+
+#### test-mine-filter.http
+- ✅ Step 6 & 7: User gets only their own posts via /me/posts - 成功
+- ✅ Step 8: Try to use /me/posts without authentication - 未登入 401
 
 ---
 
@@ -133,12 +151,13 @@
 | 功能模組 | 測試文件 | 測試數量 | 覆蓋狀態 |
 |---------|---------|---------|---------|
 | Health Check | health-check.http | 2 | ✅ 完整 |
-| US1: 公開瀏覽 | us1-acceptance.http | 15 | ✅ 完整 |
+| US1: 公開瀏覽 | us1-acceptance.http | 19 | ✅ 完整 |
 | US2: 認證系統 | us2-acceptance.http | 16 | ✅ 完整 |
 | US3: 貼文管理 | us3-acceptance.http | 17 | ✅ 完整 |
 | US4: 留言功能 | us4-acceptance.http | 7 | ✅ 完整 |
-| 進階: Mine Filter | test-mine-filter.http | 3 | ✅ 完整 |
-| **總計** | **6 個文件** | **60 個測試** | **✅ 100% 覆蓋** |
+| 進階: /me/posts | me-posts-acceptance.http | 15 | ✅ 完整 |
+| 進階: User Filter | test-mine-filter.http | 3 | ✅ 完整 |
+| **總計** | **7 個文件** | **79 個測試** | **✅ 100% 覆蓋** |
 
 ## HTTP 狀態碼覆蓋 (HTTP Status Code Coverage)
 
@@ -156,8 +175,9 @@
 ## 結論
 
 ✅ **所有要求的測試場景已完整實現**
-- 共 6 個測試文件
-- 60 個獨立測試案例
-- 涵蓋所有 12 個 API 端點
+- 共 7 個測試文件
+- 79 個獨立測試案例（含邊界測試）
+- 涵蓋所有 13 個 API 端點（含 /me 和 /me/posts）
 - 測試所有 9 種 HTTP 狀態碼
 - 包含完整的正面和負面測試案例
+- 包含邊界條件測試（limit=0, 大 offset 等）

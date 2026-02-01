@@ -1,0 +1,220 @@
+### GET /me/posts - Acceptance Tests
+### Test endpoint for getting current user's posts with pagination
+
+@baseUrl = http://localhost/api
+@user1Phone = +886901234501
+@user1Pass = Pass1234
+@user2Phone = +886901234502
+@user2Pass = Pass2234
+
+### Step 1: Login as User1
+# @name loginUser1
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user1Phone}}",
+  "password": "{{user1Pass}}"
+}
+
+### Capture user1 token
+@user1Token = {{loginUser1.response.body.accessToken}}
+
+### Step 2: Login as User2
+# @name loginUser2
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "{{user2Phone}}",
+  "password": "{{user2Pass}}"
+}
+
+### Capture user2 token
+@user2Token = {{loginUser2.response.body.accessToken}}
+
+### Step 3: User1 creates multiple posts
+# @name createUser1Post1
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "User1's first post"
+}
+
+###
+# @name createUser1Post2
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "User1's second post",
+  "image": "https://example.com/image2.jpg"
+}
+
+###
+# @name createUser1Post3
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "User1's third post"
+}
+
+### Step 4: User2 creates a post
+POST {{baseUrl}}/posts
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+  "content": "User2's post"
+}
+
+### Test 1: Get all posts for User1 (should only show User1's posts)
+GET {{baseUrl}}/me/posts
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK with { items: [...], total: 3 }
+### Should contain only User1's posts, not User2's
+
+---
+
+### Test 2: Get User1's posts with pagination (limit)
+GET {{baseUrl}}/me/posts?limit=2
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK with max 2 posts
+### Should return: { items: [...], total: 3 }
+
+---
+
+### Test 3: Get User1's posts with pagination (offset)
+GET {{baseUrl}}/me/posts?limit=2&offset=1
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK, skips first post
+### Should return: { items: [...], total: 3 }
+
+---
+
+### Test 4: Get User1's posts sorted oldest first
+GET {{baseUrl}}/me/posts?sort=oldest
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK, posts sorted by created_at ASC
+
+---
+
+### Test 5: Get User1's posts sorted newest first (default)
+GET {{baseUrl}}/me/posts?sort=newest
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK, posts sorted by created_at DESC
+
+---
+
+### Test 6: Get User2's posts (should only show User2's posts)
+GET {{baseUrl}}/me/posts
+Authorization: Bearer {{user2Token}}
+
+### Expected: 200 OK with { items: [...], total: 1 }
+### Should contain only User2's post
+
+---
+
+### Test 7: Try to access /me/posts without authentication (should get 401)
+GET {{baseUrl}}/me/posts
+
+### Expected: 401 Unauthorized
+
+---
+
+### Test 8: Invalid limit (too high)
+GET {{baseUrl}}/me/posts?limit=200
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 BAD_REQUEST
+### Should return: { errorCode: "BAD_REQUEST", message: "Limit must be between 1 and 100" }
+
+---
+
+### Test 9: Invalid limit (negative)
+GET {{baseUrl}}/me/posts?limit=-1
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 BAD_REQUEST
+
+---
+
+### Test 10: Invalid offset (negative)
+GET {{baseUrl}}/me/posts?offset=-1
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 BAD_REQUEST
+### Should return: { errorCode: "BAD_REQUEST", message: "Offset must be >= 0" }
+
+---
+
+### Test 11: Invalid sort value
+GET {{baseUrl}}/me/posts?sort=wat
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 BAD_REQUEST
+
+---
+
+### Test 12: Verify pagination with limit and offset
+GET {{baseUrl}}/me/posts?limit=1&offset=0
+Authorization: Bearer {{user1Token}}
+
+### Expected: First post (newest)
+
+###
+GET {{baseUrl}}/me/posts?limit=1&offset=1
+Authorization: Bearer {{user1Token}}
+
+### Expected: Second post
+
+###
+GET {{baseUrl}}/me/posts?limit=1&offset=2
+Authorization: Bearer {{user1Token}}
+
+### Expected: Third post (oldest)
+
+---
+
+### Test 13: Edge case - limit=0 (should get 400)
+GET {{baseUrl}}/me/posts?limit=0
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 BAD_REQUEST
+
+---
+
+### Test 14: Edge case - very large offset (beyond total)
+GET {{baseUrl}}/me/posts?limit=10&offset=99999
+Authorization: Bearer {{user1Token}}
+
+### Expected: 200 OK with empty items array
+### Should return: { items: [], total: 3 }
+
+---
+
+### Test 15: Verify soft-deleted posts excluded from /me/posts
+# If user has deleted their own posts, they should not appear in /me/posts
+GET {{baseUrl}}/me/posts
+Authorization: Bearer {{user1Token}}
+
+### Expected: Only non-deleted posts appear
+
+---
+
+## Notes
+- All /me/posts endpoints REQUIRE authentication
+- Same pagination parameters as GET /posts: limit (1-100, default: 20), offset (default: 0)
+- Same sort options as GET /posts: "newest" (default) or "oldest"
+- Returns PostListResponse with { items: [...], total: N }
+- Automatically filters to only show authenticated user's posts

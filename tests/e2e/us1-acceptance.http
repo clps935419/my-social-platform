@@ -134,6 +134,40 @@ Accept: application/json
 
 ---
 
+### Test 13: Edge case - limit=0 (should get 400)
+GET http://localhost/api/posts?limit=0
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
+### Should return: { errorCode: "BAD_REQUEST", message: "Limit must be between 1 and 100" }
+
+---
+
+### Test 14: Edge case - very large offset
+GET http://localhost/api/posts?limit=10&offset=99999
+Accept: application/json
+
+### Expected: 200 OK with empty items array
+### Should return: { items: [], total: N } where N is actual total posts
+
+---
+
+### Test 15: Comments with limit=0 (should get 400)
+GET http://localhost/api/posts/00000000-0000-0000-0000-000000000101/comments?limit=0
+Accept: application/json
+
+### Expected: 400 BAD_REQUEST
+
+---
+
+### Test 16: Comments with large offset
+GET http://localhost/api/posts/00000000-0000-0000-0000-000000000101/comments?limit=10&offset=99999
+Accept: application/json
+
+### Expected: 200 OK with empty items array
+
+---
+
 ## Notes
 - All endpoints are PUBLIC (no authentication required)
 - Posts are sorted newest first by default (created_at DESC); `sort=oldest` switches to ASC

@@ -1,5 +1,5 @@
-### Test for GET /posts with mine=true filter
-### Verifies that users can filter posts to show only their own posts
+### Test for GET /me/posts endpoint
+### Verifies that users can get only their own posts via /me/posts
 
 @baseUrl = http://localhost/api
 @user1Phone = +886901234501
@@ -56,20 +56,20 @@ Authorization: ******
 ### Step 5: Get all posts (should show both users' posts)
 GET {{baseUrl}}/posts?limit=100
 
-### Step 6: User1 gets only their own posts (mine=true)
-GET {{baseUrl}}/posts?mine=true&limit=100
+### Step 6: User1 gets only their own posts via /me/posts
+GET {{baseUrl}}/me/posts?limit=100
 Authorization: ******
 
 ### Expected: Only User1's posts
 
-### Step 7: User2 gets only their own posts (mine=true)
-GET {{baseUrl}}/posts?mine=true&limit=100
+### Step 7: User2 gets only their own posts via /me/posts
+GET {{baseUrl}}/me/posts?limit=100
 Authorization: ******
 
 ### Expected: Only User2's posts
 
-### Step 8: Try to use mine=true without authentication (should get 401)
-GET {{baseUrl}}/posts?mine=true&limit=100
+### Step 8: Try to use /me/posts without authentication (should get 401)
+GET {{baseUrl}}/me/posts?limit=100
 
 ### Expected: 401 Unauthorized
 
