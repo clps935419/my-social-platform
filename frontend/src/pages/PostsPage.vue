@@ -106,12 +106,13 @@ const queryOptions = computed(() => ({
 }));
 
 const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  useInfiniteQuery(queryOptions);
+  useInfiniteQuery(() => queryOptions.value);
 
 const posts = computed(() => data.value?.pages?.flatMap((page) => page.items ?? []) ?? []);
 
 watch([sortOrder, mineOnly], () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  refetch();
 });
 
 watch(currentUser, (user) => {

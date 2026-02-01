@@ -118,7 +118,11 @@ export const configureApiClient = () => {
       const originalRequest = error.config;
 
       // If 401 and not already retried
-      if (error.response?.status === 401 && !originalRequest._retry && !isPublicRequest(originalRequest)) {
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !isPublicRequest(originalRequest)
+      ) {
         originalRequest._retry = true;
 
         // Single-flight refresh

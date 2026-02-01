@@ -41,6 +41,7 @@ import { ElMessage } from 'element-plus';
 import { isAxiosError } from 'axios';
 import { useQueryClient } from '@tanstack/vue-query';
 import { createPost } from '../api/generated/sdk.gen';
+import { invalidateMeQuery } from '../queries/me';
 
 const queryClient = useQueryClient();
 
@@ -75,13 +76,14 @@ async function handleSubmit() {
     // Clear form
     content.value = '';
 
-    // Invalidate posts query to refresh list using generated query key
+    // Invalidate posts queries and /me to refresh counts/state
     queryClient.invalidateQueries({
       predicate: (query) => {
         const key = query.queryKey?.[0] as { _id?: string } | undefined;
-        return key?._id === 'listPosts';
+        return key?._id === 'listPosts' || key?._id === 'getMyPosts';
       },
     });
+    invalidateMeQuery(queryClient);
 
     emit('post-created');
   } catch (error: unknown) {

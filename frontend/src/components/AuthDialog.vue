@@ -248,6 +248,7 @@ async function handleSubmit() {
 
       const response = await login({
         body: loginPayload,
+        throwOnError: true,
       });
 
       const data = response.data as AuthResponse;
@@ -262,6 +263,7 @@ async function handleSubmit() {
 
       const response = await register({
         body: registerPayload,
+        throwOnError: true,
       });
 
       const data = response.data as AuthResponse;
@@ -318,7 +320,28 @@ function handleClose() {
 
 function getErrorMessage(error: unknown, fallback: string) {
   if (isAxiosError(error)) {
-    const data = error.response?.data as { message?: string } | undefined;
+    const data = error.response?.data as { errorCode?: string; message?: string } | undefined;
+    const errorCode = data?.errorCode;
+    const status = error.response?.status;
+
+    const codeMessageMap: Record<string, string> = {
+      CONFLICT: '手機號碼已註冊，請直接登入',
+      UNAUTHORIZED: '手機號碼或密碼錯誤',
+      BAD_REQUEST: '請確認輸入內容格式是否正確',
+      NOT_FOUND: '找不到對應的帳號資訊',
+      FORBIDDEN: '權限不足，請重新登入',
+      TOO_MANY_REQUESTS: '操作過於頻繁，請稍後再試',
+    };
+
+    if (errorCode && codeMessageMap[errorCode]) {
+      return codeMessageMap[errorCode];
+    }
+
+    if (status === 409) return '手機號碼已註冊，請直接登入';
+    if (status === 401) return '手機號碼或密碼錯誤';
+    if (status === 400) return '請確認輸入內容格式是否正確';
+    if (status === 429) return '操作過於頻繁，請稍後再試';
+
     return data?.message || error.message || fallback;
   }
   if (error instanceof Error) {
