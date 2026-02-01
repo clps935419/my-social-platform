@@ -45,7 +45,7 @@ public class PostController {
     @GetMapping
     @Operation(
         summary = "List posts",
-        description = "Get a paginated list of posts. Supports sorting by creation date. Excludes soft-deleted posts. Public endpoint, no authentication required. Optionally filter by current user's posts using 'mine=true'."
+        description = "Get a paginated list of posts. Supports sorting by creation date. Excludes soft-deleted posts. Public endpoint, no authentication required."
     )
     public ResponseEntity<PostListResponse> listPosts(
         @Parameter(description = "Maximum number of posts to return (1-100, default: 20)")
@@ -54,31 +54,16 @@ public class PostController {
         @Parameter(description = "Number of posts to skip (default: 0)")
         @RequestParam(required = false) Integer offset,
         
-        @Parameter(description = "Filter to show only current user's posts (requires authentication)")
-        @RequestParam(required = false) Boolean mine,
-        
         @Parameter(description = "Sort order: 'newest' (newest first, default) or 'oldest' (oldest first)")
-        @RequestParam(required = false) String sort,
-        
-        HttpServletRequest httpRequest
+        @RequestParam(required = false) String sort
     ) {
         // Validate and normalize parameters
         int validatedLimit = RequestValidators.validateLimit(limit);
         int validatedOffset = RequestValidators.validateOffset(offset);
         String validatedSort = RequestValidators.validateSort(sort, "newest");
         
-        // Get user ID if filtering by current user
-        String authorUserId = null;
-        if (mine != null && mine) {
-            UUID userId = (UUID) httpRequest.getAttribute("userId");
-            if (userId == null) {
-                throw new UnauthorizedException("Authentication required to filter your own posts");
-            }
-            authorUserId = userId.toString();
-        }
-        
-        // Call DAO
-        Map<String, Object> result = postDao.listPosts(validatedLimit, validatedOffset, authorUserId, validatedSort);
+        // Call DAO to get all posts (no user filter)
+        Map<String, Object> result = postDao.listPosts(validatedLimit, validatedOffset, null, validatedSort);
         
         @SuppressWarnings("unchecked")
         List<Post> posts = (List<Post>) result.get("posts");
