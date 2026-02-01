@@ -2,7 +2,7 @@ import { client as heyClient } from './generated/client.gen';
 import { refresh } from './generated/sdk.gen';
 import { getAccessToken, getRefreshToken, saveSession, clearSession } from '../auth/session';
 import type { RefreshResponse2 } from './generated/types.gen';
-import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
@@ -16,7 +16,7 @@ const publicEndpointRules = [
   { method: 'POST', pattern: /^\/auth\/refresh$/ },
 ];
 
-const normalizePath = (config: axios.AxiosRequestConfig): string => {
+const normalizePath = (config: AxiosRequestConfig): string => {
   const baseURL = config.baseURL ?? '';
   const url = config.url ?? '';
   let path = '';
@@ -42,7 +42,7 @@ const normalizePath = (config: axios.AxiosRequestConfig): string => {
   return path;
 };
 
-const isPublicRequest = (config: axios.AxiosRequestConfig): boolean => {
+const isPublicRequest = (config: AxiosRequestConfig): boolean => {
   const method = (config.method ?? 'get').toUpperCase();
   const path = normalizePath(config);
   return publicEndpointRules.some((rule) => rule.method === method && rule.pattern.test(path));
@@ -97,8 +97,8 @@ export const configureApiClient = () => {
   axiosInstance.interceptors.request.use((config) => {
     if (isPublicRequest(config)) {
       if (config.headers) {
-        delete (config.headers as Record<string, string>).Authorization;
-        delete (config.headers as Record<string, string>).authorization;
+        (config.headers as Record<string, string | undefined>).Authorization = undefined;
+        (config.headers as Record<string, string | undefined>).authorization = undefined;
       }
       return config;
     }
@@ -118,7 +118,11 @@ export const configureApiClient = () => {
       const originalRequest = error.config;
 
       // If 401 and not already retried
-      if (error.response?.status === 401 && !originalRequest._retry && !isPublicRequest(originalRequest)) {
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !isPublicRequest(originalRequest)
+      ) {
         originalRequest._retry = true;
 
         // Single-flight refresh
