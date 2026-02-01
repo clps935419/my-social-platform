@@ -49,7 +49,7 @@
         <el-input
           v-model="form.password"
           type="password"
-          placeholder="請輸入密碼"
+          placeholder="請輸入密碼（至少 8 位數）"
           prefix-icon="Lock"
           show-password
           @keyup.enter="handleSubmit"
@@ -172,7 +172,7 @@ const rules: FormRules = {
     {
       validator: (_rule, value, callback) => {
         if (isLogin.value) return callback();
-        if (!value || value.length < 6) return callback(new Error('密碼長度至少為 6 個字元'));
+        if (!value || value.length < 8) return callback(new Error('密碼長度至少為 8 個字元'));
         return callback();
       },
       trigger: 'blur',
