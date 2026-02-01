@@ -36,23 +36,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Whitelist: public routes that don't require JWT verification
         if (isPublicRoute(path, method)) {
+            // For public routes, optionally extract userId if token is present (but don't require it)
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    UUID userId = jwtService.verifyToken(token);
+                    request.setAttribute("userId", userId);
+                } catch (Exception e) {
+                    // For public routes, ignore invalid tokens (don't fail)
+                }
+            }
             filterChain.doFilter(request, response);
             return;
         }
 
+        // For protected routes, token is required
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            try {
-                UUID userId = jwtService.verifyToken(token);
-                // Set user ID in request attribute for controllers to access
-                request.setAttribute("userId", userId);
-            } catch (Exception e) {
-                // Invalid token - return 401
-                sendUnauthorizedResponse(response, "Invalid or expired token");
-                return;
-            }
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            sendUnauthorizedResponse(response, "Missing or invalid Authorization header");
+            return;
+        }
+
+        String token = authHeader.substring(7);
+        try {
+            UUID userId = jwtService.verifyToken(token);
+            // Set user ID in request attribute for controllers to access
+            request.setAttribute("userId", userId);
+        } catch (Exception e) {
+            // Invalid token - return 401
+            sendUnauthorizedResponse(response, "Invalid or expired token");
+            return;
         }
 
         filterChain.doFilter(request, response);
