@@ -1,0 +1,215 @@
+### User Story 2 - Phone Number Registration and Login Acceptance Tests
+### Base URL: http://localhost/api
+
+### 1. Register new user (success)
+POST http://localhost/api/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345678",
+  "userName": "Test User",
+  "email": "test@example.com",
+  "password": "password123",
+  "coverImage": "https://example.com/avatar.jpg",
+  "biography": "This is a test user"
+}
+
+### Expected: 201 Created with accessToken, refreshToken, and user info
+
+###
+
+### 2. Register with duplicate phone number (409 conflict)
+POST http://localhost/api/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345678",
+  "userName": "Another User",
+  "email": "another@example.com",
+  "password": "password456"
+}
+
+### Expected: 409 Conflict - Phone number already exists
+
+###
+
+### 3. Register with invalid phone number (400)
+POST http://localhost/api/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "invalid-phone",
+  "userName": "Test User",
+  "password": "password123"
+}
+
+### Expected: 400 Bad Request - Invalid phone number format
+
+###
+
+### 4. Login with correct credentials (success)
+POST http://localhost/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345678",
+  "password": "password123"
+}
+
+### Expected: 200 OK with accessToken, refreshToken, and user info
+### Save the accessToken and refreshToken for next tests
+
+###
+
+### 5. Login with wrong password (401)
+POST http://localhost/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345678",
+  "password": "wrongpassword"
+}
+
+### Expected: 401 Unauthorized - Invalid credentials
+
+###
+
+### 6. Login with non-existent phone number (401)
+POST http://localhost/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886999999999",
+  "password": "password123"
+}
+
+### Expected: 401 Unauthorized - Invalid credentials
+
+###
+
+### 7. Get user profile with valid token (success)
+# Replace {{accessToken}} with the token from login/register
+GET http://localhost/api/me
+Authorization: Bearer {{accessToken}}
+
+### Expected: 200 OK with user profile (userId, phoneNumber, userName, email, etc.)
+
+###
+
+### 8. Get user profile without token (401)
+GET http://localhost/api/me
+
+### Expected: 401 Unauthorized
+
+###
+
+### 9. Get user profile with invalid token (401)
+GET http://localhost/api/me
+Authorization: Bearer invalid-token-here
+
+### Expected: 401 Unauthorized - Invalid or expired token
+
+###
+
+### 10. Refresh token (success)
+# Replace {{refreshToken}} with the token from login/register
+POST http://localhost/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Expected: 200 OK with new accessToken and new refreshToken
+### Save the new tokens
+
+###
+
+### 11. Try to use old refresh token again (401 - rotation test)
+# Use the OLD refreshToken from step 10
+POST http://localhost/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{oldRefreshToken}}"
+}
+
+### Expected: 401 Unauthorized - Token should be revoked after rotation
+
+###
+
+### 12. Refresh with invalid token (401)
+POST http://localhost/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "invalid-refresh-token"
+}
+
+### Expected: 401 Unauthorized
+
+###
+
+### 13. Register with phone number containing separators (normalization test)
+POST http://localhost/api/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886-912-345-679",
+  "userName": "User With Dashes",
+  "password": "password123"
+}
+
+### Expected: 201 Created - Phone number should be normalized to E.164
+
+###
+
+### 14. Login with normalized phone number
+POST http://localhost/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345679",
+  "password": "password123"
+}
+
+### Expected: 200 OK - Should work with normalized format
+
+###
+
+### 15. Rate limit test for login - Multiple rapid requests (429)
+# Send this request 6+ times rapidly to trigger rate limit
+POST http://localhost/api/auth/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886912345678",
+  "password": "password123"
+}
+
+### Expected: After 5 requests within 60 seconds, should return 429 Too Many Requests
+
+###
+
+### 16. Rate limit test for register - Multiple rapid requests (429)
+# Send this request 6+ times rapidly to trigger rate limit
+POST http://localhost/api/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886900000001",
+  "userName": "Rate Limit Test User",
+  "password": "password123"
+}
+
+### Expected: After 5 requests within 60 seconds, should return 429 Too Many Requests
+
+###
+
+### Notes:
+### - Phone number format: E.164 (e.g., +886912345678)
+### - Access token expires in 3600 seconds (1 hour)
+### - Refresh token expires in 2592000 seconds (30 days)
+### - Refresh token rotation: old token becomes invalid after refresh
+### - Rate limit: 5 requests per 60 seconds for /auth/register and /auth/login
+### - All timestamps are in UTC with ISO 8601 format (e.g., 2026-01-30T12:34:56Z)
