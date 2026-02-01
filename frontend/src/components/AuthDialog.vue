@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     :title="isLogin ? '會員登入' : '會員註冊'"
-    width="90%"
+    width="min(560px, calc(100vw - 32px))"
     class="auth-dialog"
     align-center
     destroy-on-close
@@ -296,9 +296,6 @@ function getErrorMessage(error: unknown, fallback: string) {
 </script>
 
 <style scoped>
-.auth-dialog {
-  max-width: 420px;
-}
 
 .region-select {
   width: 120px;
