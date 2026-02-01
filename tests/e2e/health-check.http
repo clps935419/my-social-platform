@@ -1,0 +1,30 @@
+### Health Check API Tests
+### Base URL: http://localhost/api
+### No authentication required
+
+### Test 1: Health check returns 200 OK
+GET http://localhost/api/health
+Accept: application/json
+
+### Expected: 200 OK
+### Response should include:
+### {
+###   "status": "UP",
+###   "timestamp": "2026-01-30T12:34:56Z"
+### }
+
+###
+
+### Test 2: Verify health check responds without database
+# Even if database is down, health check should return 200
+# This endpoint does NOT require database connection
+GET http://localhost/api/health
+
+### Expected: 200 OK with status "UP"
+
+###
+
+### Notes:
+### - This endpoint is used to verify backend is running
+### - Does NOT check database connectivity
+### - Returns current UTC timestamp in ISO 8601 format
