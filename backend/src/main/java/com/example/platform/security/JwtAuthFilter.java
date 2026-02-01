@@ -31,6 +31,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        // Whitelist: public routes that don't require JWT verification
+        if (isPublicRoute(path, method)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -47,6 +56,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Check if the route is public and doesn't require JWT verification
+     */
+    private boolean isPublicRoute(String path, String method) {
+        // POST /auth/register
+        if ("POST".equals(method) && path.endsWith("/auth/register")) {
+            return true;
+        }
+        // POST /auth/login
+        if ("POST".equals(method) && path.endsWith("/auth/login")) {
+            return true;
+        }
+        // POST /auth/refresh
+        if ("POST".equals(method) && path.endsWith("/auth/refresh")) {
+            return true;
+        }
+        // GET /posts
+        if ("GET".equals(method) && path.endsWith("/posts")) {
+            return true;
+        }
+        // GET /posts/{postId}/comments (matches pattern like /posts/UUID/comments)
+        if ("GET".equals(method) && path.matches(".*/posts/[^/]+/comments")) {
+            return true;
+        }
+        // GET /health
+        if ("GET".equals(method) && path.endsWith("/health")) {
+            return true;
+        }
+        return false;
     }
 
     private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
