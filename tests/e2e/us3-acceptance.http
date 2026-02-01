@@ -207,3 +207,24 @@ Authorization: Bearer {{user1Token}}
 }
 
 ### Expected: 201 Created
+
+###
+
+### Step 22: Update post with invalid postId format (should get 400)
+PATCH {{baseUrl}}/posts/invalid-uuid-format
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "content": "Trying to update with invalid ID"
+}
+
+### Expected: 400 Bad Request - Invalid post ID format
+
+###
+
+### Step 23: Delete post with invalid postId format (should get 400)
+DELETE {{baseUrl}}/posts/not-a-valid-uuid
+Authorization: Bearer {{user1Token}}
+
+### Expected: 400 Bad Request - Invalid post ID format

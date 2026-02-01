@@ -70,6 +70,19 @@ Authorization: Bearer {{accessToken}}
 
 ###
 
+### 5b. Create comment with invalid postId format (400)
+POST http://localhost/api/posts/invalid-uuid/comments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "content": "Comment on invalid post ID"
+}
+
+### Expected: 400 Bad Request - Invalid post ID format
+
+###
+
 ### 6. Create comment on soft-deleted post (404)
 # First, create and delete a post (requires author access token)
 # @name createTestPost

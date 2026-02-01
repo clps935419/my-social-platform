@@ -177,13 +177,28 @@ Content-Type: application/json
 
 ###
 
-### 15. Rate limit test - Multiple rapid requests (429)
+### 15. Rate limit test for login - Multiple rapid requests (429)
 # Send this request 6+ times rapidly to trigger rate limit
 POST http://localhost/api/auth/login
 Content-Type: application/json
 
 {
   "phoneNumber": "+886912345678",
+  "password": "password123"
+}
+
+### Expected: After 5 requests within 60 seconds, should return 429 Too Many Requests
+
+###
+
+### 16. Rate limit test for register - Multiple rapid requests (429)
+# Send this request 6+ times rapidly to trigger rate limit
+POST http://localhost/api/auth/register
+Content-Type: application/json
+
+{
+  "phoneNumber": "+886900000001",
+  "userName": "Rate Limit Test User",
   "password": "password123"
 }
 
